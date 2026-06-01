@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SciLab — IB Grade 6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0D1117;
+    --surface: #161B22;
+    --surface2: #1C2230;
+    --border: rgba(255,255,255,0.08);
+    --text: #E6EDF3;
+    --muted: #7D8590;
+    --accent: #39D353;
+    --accent2: #58A6FF;
+    --accent3: #F78166;
+    --accent4: #D2A8FF;
+    --accent5: #FFA657;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --nav-h: 72px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* SCROLLABLE CONTENT AREA */
+  #app-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px);
+  }
+
+  #app-content::-webkit-scrollbar { display: none; }
+
+  /* BOTTOM NAV */
+  #bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    height: calc(var(--nav-h) + var(--safe-bottom));
+    padding-bottom: var(--safe-bottom);
+    background: rgba(13,17,23,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 100;
+  }
+
+  .nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+    flex: 1;
+  }
+
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn svg { width: 22px; height: 22px; stroke-width: 1.8; }
+
+  .nav-dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .nav-btn.active .nav-dot { opacity: 1; }
+
+  /* SCREENS */
+  .screen { display: none; padding: 0 16px; }
+  .screen.active { display: block; }
+
+  /* HEADER */
+  .page-header {
+    padding: 20px 0 12px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .page-header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+  }
+
+  .page-header h1 span { color: var(--accent); }
+
+  /* HERO CARD */
+  .hero-card {
+    background: linear-gradient(135deg, #1a2744 0%, #162032 100%);
+    border: 1px solid rgba(88,166,255,0.2);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(57,211,83,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .hero-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 6px;
+  }
+
+  .hero-card h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .stat-pill {
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid;
+  }
+
+  .stat-green { background: rgba(57,211,83,0.12); color: var(--accent); border-color: rgba(57,211,83,0.25); }
+  .stat-amber { background: rgba(255,166,87,0.12); color: var(--accent5); border-color: rgba(255,166,87,0.25); }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 20px 0 10px;
+  }
+
+  /* UNIT CARDS */
+  .unit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .unit-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+    active-scale: 0.97;
+  }
+
+  .unit-card:active { transform: scale(0.97); }
+
+  .unit-emoji { font-size: 26px; margin-bottom: 8px; display: block; }
+
+  .unit-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .unit-card p { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+  .unit-progress {
+    margin-top: 10px;
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .unit-progress-fill { height: 100%; border-radius: 99px; }
+
+  /* ACTIVITY CARDS */
+  .activity-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .activity-card:active { transform: scale(0.98); }
+
+  .act-icon-box {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .act-body { flex: 1; min-width: 0; }
+  .act-body h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
+  .act-body p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  .act-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+
+  .act-tag {
+    font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 99px;
+    letter-spacing: 0.03em;
+  }
+
+  .tag-green { background: rgba(57,211,83,0.12); color: var(--accent); }
+  .tag-blue { background: rgba(88,166,255,0.12); color: var(--accent2); }
+  .tag-amber { background: rgba(255,166,87,0.12); color: var(--accent5); }
+  .tag-purple { background: rgba(210,168,255,0.12); color: var(--accent4); }
+
+  .check-btn {
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    background: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    margin-top: 2px;
+  }
+
+  .check-btn.done { background: rgba(57,211,83,0.15); border-color: var(--accent); color: var(--accent); }
+
+  /* QUIZ */
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+
+  .quiz-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .quiz-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px; border-radius: 99px;
+    background: rgba(88,166,255,0.12); color: var(--accent2);
+  }
+
+  .quiz-counter { font-size: 12px; color: var(--muted); font-weight: 700; }
+
+  .quiz-q {
+    font-size: 17px; font-weight: 700; line-height: 1.4;
+    margin-bottom: 18px; color: var(--text);
+  }
+
+  .opt-btn {
+    width: 100%; text-align: left;
+    padding: 14px 16px; margin-bottom: 8px;
+    font-size: 14px; font-weight: 600;
+    font-family: 'Nunito', sans-serif;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .opt-btn:active { transform: scale(0.98); }
+  .opt-btn.correct { background: rgba(57,211,83,0.12); border-color: var(--accent); color: var(--accent); }
+  .opt-btn.wrong { background: rgba(247,129,102,0.12); border-color: var(--accent3); color: var(--accent3); }
+
+  .feedback-box {
+    padding: 12px 14px; border-radius: var(--radius-sm);
+    font-size: 13px; line-height: 1.6; margin: 10px 0;
+    display: none;
+  }
+
+  .feedback-box.show { display: block; }
+  .feedback-correct { background: rgba(57,211,83,0.08); color: #7ee787; border: 1px solid rgba(57,211,83,0.2); }
+  .feedback-wrong { background: rgba(247,129,102,0.08); color: #ffa198; border: 1px solid rgba(247,129,102,0.2); }
+
+  .next-q-btn {
+    width: 100%; padding: 14px;
+    font-size: 15px; font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    background: rgba(57,211,83,0.12);
+    color: var(--accent); border: 1px solid rgba(57,211,83,0.25);
+    border-radius: var(--radius-sm);
+    cursor: pointer; display: none;
+    transition: all 0.15s;
+    margin-top: 4px;
+  }
+
+  .next-q-btn.show { display: block; }
+  .next-q-btn:active { transform: scale(0.98); }
+
+  .score-screen {
+    text-align: center; padding: 32px 20px;
+  }
+
+  .score-big {
+    font-family: 'Syne', sans-serif;
+    font-size: 72px; font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .score-sub { font-size: 15px; color: var(--muted); margin-top: 8px; }
+  .score-msg { font-size: 18px; font-weight: 700; margin-top: 20px; }
+
+  .retry-btn {
+    margin-top: 24px; padding: 14px 32px;
+    font-size: 15px; font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    background: rgba(255,255,255,0.06);
+    color: var(--text); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .retry-btn:active { transform: scale(0.97); }
+
+  /* LAB CARDS */
+  .lab-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 10px;
+  }
+
+  .lab-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+
+  .lab-num {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800;
+    background: rgba(88,166,255,0.12); color: var(--accent2);
+    flex-shrink: 0;
+  }
+
+  .lab-header h3 { font-size: 15px; font-weight: 700; line-height: 1.3; }
+  .lab-card p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+
+  .materials-wrap { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+
+  .material-chip {
+    font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 99px;
+    background: rgba(255,255,255,0.05); color: var(--muted);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .lab-btn {
+    width: 100%; padding: 12px;
+    font-size: 13px; font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    background: rgba(88,166,255,0.08);
+    color: var(--accent2); border: 1px solid rgba(88,166,255,0.2);
+    border-radius: var(--radius-sm); cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .lab-btn:active { transform: scale(0.98); }
+
+  /* ASK CLAUDE */
+  .ask-screen { padding-bottom: 16px; }
+
+  .ask-intro {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .ask-intro h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+  .ask-intro p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  .chips-scroll {
+    display: flex; gap: 8px;
+    overflow-x: auto; padding-bottom: 4px;
+    margin-bottom: 16px;
+    scrollbar-width: none;
+  }
+
+  .chips-scroll::-webkit-scrollbar { display: none; }
+
+  .chip-btn {
+    white-space: nowrap;
+    font-size: 12px; font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    padding: 8px 14px; border-radius: 99px;
+    background: var(--surface);
+    color: var(--muted); border: 1px solid var(--border);
+    cursor: pointer; flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  .chip-btn:active { transform: scale(0.96); color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+  .chat-messages {
+    display: flex; flex-direction: column; gap: 10px;
+    margin-bottom: 16px; min-height: 60px;
+  }
+
+  .msg-user, .msg-ai {
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 14px; line-height: 1.6; max-width: 88%;
+  }
+
+  .msg-user {
+    background: rgba(88,166,255,0.12); color: #b0d0ff;
+    border: 1px solid rgba(88,166,255,0.2);
+    align-self: flex-end; border-radius: 16px 16px 4px 16px;
+  }
+
+  .msg-ai {
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border);
+    align-self: flex-start; border-radius: 4px 16px 16px 16px;
+  }
+
+  .msg-ai.loading { color: var(--muted); font-style: italic; }
+
+  .ask-input-row {
+    display: flex; gap: 8px; align-items: flex-end;
+  }
+
+  .ask-input {
+    flex: 1; padding: 12px 14px;
+    font-size: 14px; font-family: 'Nunito', sans-serif;
+    background: var(--surface); color: var(--text);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius-sm);
+    outline: none; resize: none; height: 48px;
+    transition: border-color 0.2s;
+    line-height: 1.4;
+  }
+
+  .ask-input:focus { border-color: rgba(88,166,255,0.4); }
+
+  .send-btn {
+    width: 48px; height: 48px; border-radius: var(--radius-sm);
+    background: var(--accent2); color: white;
+    border: none; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; transition: all 0.15s;
+  }
+
+  .send-btn:active { transform: scale(0.93); }
+  .send-btn:disabled { opacity: 0.4; pointer-events: none; }
+
+  /* Progress bar header */
+  .progress-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px 0;
+  }
+
+  .app-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px; font-weight: 800;
+    color: var(--accent);
+  }
+
+  .app-logo span { color: var(--text); font-weight: 400; font-size: 14px; }
+
+  .xp-badge {
+    margin-left: auto;
+    font-size: 12px; font-weight: 700;
+    padding: 5px 12px; border-radius: 99px;
+    background: rgba(57,211,83,0.1); color: var(--accent);
+    border: 1px solid rgba(57,211,83,0.2);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .screen.active { animation: fadeUp 0.25s ease; }
+</style>
+</head>
+<body>
+
+<div class="progress-header">
+  <div class="app-logo">SciLab <span>IB Grade 6</span></div>
+  <div class="xp-badge" id="xpBadge">⭐ 0 XP</div>
+</div>
+
+<div id="app-content">
+
+  <!-- HOME SCREEN -->
+  <div class="screen active" id="screen-home">
+    <div class="page-header">
+      <h1>Hello,<br><span>Scientist! 🔬</span></h1>
+    </div>
+
+    <div class="hero-card">
+      <div class="hero-label">IB MYP Year 1</div>
+      <h2>Your holiday<br>science journey</h2>
+      <div class="stats-row">
+        <div class="stat-pill stat-green" id="streakPill">🔥 0 day streak</div>
+        <div class="stat-pill stat-amber">6 units to explore</div>
+      </div>
+    </div>
+
+    <div class="section-title">Units</div>
+    <div class="unit-grid" id="unitGrid"></div>
+  </div>
+
+  <!-- DAILY SCREEN -->
+  <div class="screen" id="screen-daily">
+    <div class="page-header">
+      <h1>Daily <span style="color:var(--accent5)">Activities</span></h1>
+    </div>
+    <div id="activityList"></div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div class="screen" id="screen-quiz">
+    <div class="page-header">
+      <h1>Science <span style="color:var(--accent4)">Quiz</span></h1>
+    </div>
+    <div id="quizArea"></div>
+  </div>
+
+  <!-- LAB SCREEN -->
+  <div class="screen" id="screen-lab">
+    <div class="page-header">
+      <h1>Home <span style="color:var(--accent2)">Lab</span></h1>
+    </div>
+    <div id="labList"></div>
+  </div>
+
+  <!-- ASK SCREEN -->
+  <div class="screen ask-screen" id="screen-ask">
+    <div class="page-header">
+      <h1>Ask <span style="color:var(--accent)">Claude</span></h1>
+    </div>
+
+    <div class="ask-intro">
+      <h2>Your science tutor</h2>
+      <p>Ask anything about IB Grade 6 science — concepts, experiments, exam tips, or help understanding your homework.</p>
+    </div>
+
+    <div class="chips-scroll" id="promptChips"></div>
+
+    <div class="chat-messages" id="chatMessages"></div>
+
+    <div class="ask-input-row">
+      <textarea class="ask-input" id="askInput" placeholder="Ask a science question..." rows="1"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendQuestion()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav id="bottom-nav">
+  <button class="nav-btn active" onclick="showScreen('home',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Home
+    <div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" onclick="showScreen('daily',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Daily
+    <div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" onclick="showScreen('quiz',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    Quiz
+    <div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" onclick="showScreen('lab',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2v17.5c0 1.4-1.1 2.5-2.5 2.5s-2.5-1.1-2.5-2.5V2"/><path d="M8.5 2h7"/><path d="M14.5 16h-5"/></svg>
+    Lab
+    <div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" onclick="showScreen('ask',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    Ask
+    <div class="nav-dot"></div>
+  </button>
+</nav>
+
+<script>
+const state = { xp: 0, streak: 0, completed: {}, qIdx: 0, quizScore: 0, quizDone: false };
+
+const units = [
+  { emoji:'🦠', title:'Biology', sub:'Cells & Living Things', color:'#39D353', pct:40 },
+  { emoji:'⚗️', title:'Chemistry', sub:'Matter & Materials', color:'#58A6FF', pct:25 },
+  { emoji:'⚡', title:'Physics', sub:'Forces & Energy', color:'#FFA657', pct:15 },
+  { emoji:'🌍', title:'Earth & Space', sub:'Solar System & Weather', color:'#D2A8FF', pct:55 },
+  { emoji:'🔍', title:'Inquiry', sub:'Scientific Method', color:'#F78166', pct:30 },
+  { emoji:'♻️', title:'Environment', sub:'Sustainability', color:'#39D353', pct:0 },
+];
+
+const activities = [
+  { id:'a1', emoji:'🔬', title:'Cell sketch challenge', desc:'Look at an onion skin in bright light. Draw and label cell wall, nucleus, and membrane.', tags:[{t:'Biology',c:'tag-green'},{t:'15 min',c:'tag-blue'}], bg:'rgba(57,211,83,0.1)' },
+  { id:'a2', emoji:'⚗️', title:'Kitchen chemistry', desc:'Make 3 mixtures: salt+water, oil+water, sand+water. Classify each as solution, suspension, or colloid.', tags:[{t:'Chemistry',c:'tag-blue'},{t:'20 min',c:'tag-amber'}], bg:'rgba(88,166,255,0.1)' },
+  { id:'a3', emoji:'📊', title:'Temperature log', desc:'Measure room temperature every 2 hours. Plot a graph. What patterns do you notice?', tags:[{t:'Inquiry',c:'tag-purple'},{t:'All day',c:'tag-amber'}], bg:'rgba(210,168,255,0.1)' },
+  { id:'a4', emoji:'🌱', title:'Photosynthesis test', desc:'Cover half a leaf with tape. After 2 days, test both halves with iodine. Explain your results.', tags:[{t:'Biology',c:'tag-green'},{t:'2 days',c:'tag-amber'}], bg:'rgba(57,211,83,0.1)' },
+  { id:'a5', emoji:'🌍', title:'Rock classification', desc:'Collect 5 soil/rock samples. Classify them and research how they formed.', tags:[{t:'Earth',c:'tag-purple'},{t:'30 min',c:'tag-blue'}], bg:'rgba(210,168,255,0.1)' },
+  { id:'a6', emoji:'⚡', title:'Simple circuit', desc:'Using a battery, wire, and bulb, build a working circuit. Draw the circuit diagram.', tags:[{t:'Physics',c:'tag-amber'},{t:'25 min',c:'tag-blue'}], bg:'rgba(255,166,87,0.1)' },
+];
+
+const questions = [
+  { q:'What is the powerhouse of the cell?', opts:['Cell wall','Nucleus','Mitochondria','Ribosome'], ans:2, exp:'Mitochondria produce ATP through cellular respiration — they\'re the energy factories.' },
+  { q:'Which state of matter has a definite volume but no definite shape?', opts:['Solid','Liquid','Gas','Plasma'], ans:1, exp:'Liquids have fixed volume but take the shape of their container.' },
+  { q:'What is the independent variable in an experiment?', opts:['What you measure','What you change','What stays the same','The conclusion'], ans:1, exp:'The independent variable is what you deliberately change in an experiment.' },
+  { q:'What force pulls objects towards the centre of the Earth?', opts:['Magnetism','Friction','Tension','Gravity'], ans:3, exp:'Gravity is the attractive force between masses — it gives us our weight.' },
+  { q:'Which process do plants use to make their own food?', opts:['Respiration','Digestion','Photosynthesis','Excretion'], ans:2, exp:'Photosynthesis uses sunlight, water, and CO₂ to produce glucose and oxygen.' },
+];
+
+const experiments = [
+  { num:'01', title:'Density tower', desc:'Layer honey, dish soap, water, oil, and rubbing alcohol. They separate by density — measure each layer height.', mats:['honey','dish soap','water','oil','rubbing alcohol','tall glass'], prompt:'Explain the science behind the density tower experiment for IB grade 6 in simple steps' },
+  { num:'02', title:'Lung capacity test', desc:'Blow a balloon in one breath, measure the circumference. Compare with family. Connect to biology.', mats:['balloon','ruler','notebook'], prompt:'Explain how the balloon lung capacity experiment links to IB MYP biology' },
+  { num:'03', title:'Chromatography art', desc:'Draw with washable markers on coffee filter paper. Drop water in the center. Watch pigments separate.', mats:['coffee filter','washable markers','water','dropper'], prompt:'Explain chromatography for grade 6 IB chemistry in simple terms' },
+  { num:'04', title:'Pendulum physics', desc:'Make a pendulum from string and a coin. Change string length and count swings per 30 seconds.', mats:['string','coin','ruler','timer'], prompt:'Help me write a pendulum experiment report for IB grade 6 scientific inquiry' },
+  { num:'05', title:'Seed germination', desc:'Grow 4 bean seeds under different conditions: light/dark, wet/dry. Record measurements for a week.', mats:['bean seeds','4 cups','soil','water'], prompt:'What are good independent and dependent variables for a seed germination experiment?' },
+];
+
+const chips = [
+  'Explain cell theory simply 🦠',
+  'How to write a hypothesis? 📝',
+  "Newton's laws of motion ⚡",
+  'Why does ice float? 🧊',
+  'Physical vs chemical change ⚗️',
+  'Planets mnemonic 🌍',
+];
+
+// RENDER UNITS
+function renderUnits() {
+  document.getElementById('unitGrid').innerHTML = units.map(u => `
+    <div class="unit-card" onclick="askUnit('${u.title}')">
+      <span class="unit-emoji">${u.emoji}</span>
+      <h3>${u.title}</h3>
+      <p>${u.sub}</p>
+      <div class="unit-progress">
+        <div class="unit-progress-fill" style="width:${u.pct}%;background:${u.color};"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// RENDER ACTIVITIES
+function renderActivities() {
+  document.getElementById('activityList').innerHTML = activities.map(a => `
+    <div class="activity-card">
+      <div class="act-icon-box" style="background:${a.bg}">${a.emoji}</div>
+      <div class="act-body">
+        <h3>${a.title}</h3>
+        <p>${a.desc}</p>
+        <div class="act-tags">${a.tags.map(t=>`<span class="act-tag ${t.c}">${t.t}</span>`).join('')}</div>
+      </div>
+      <button class="check-btn ${state.completed[a.id]?'done':''}" id="cb-${a.id}" onclick="toggleDone('${a.id}',event)">
+        ${state.completed[a.id]?'✓':''}
+      </button>
+    </div>
+  `).join('');
+}
+
+function toggleDone(id, e) {
+  e.stopPropagation();
+  state.completed[id] = !state.completed[id];
+  if (state.completed[id]) { state.xp += 10; state.streak++; updateXP(); }
+  renderActivities();
+}
+
+// RENDER QUIZ
+function renderQuiz() {
+  const el = document.getElementById('quizArea');
+  if (state.quizDone) {
+    el.innerHTML = `<div class="quiz-card"><div class="score-screen">
+      <div class="score-big">${state.quizScore}/5</div>
+      <div class="score-sub">quiz complete</div>
+      <div class="score-msg">${state.quizScore>=4?'🎉 Brilliant work!':state.quizScore>=2?'👍 Good effort!':'📖 Keep practising!'}</div>
+      <button class="retry-btn" onclick="resetQuiz()">Try again</button>
+    </div></div>`;
+    return;
+  }
+  const q = questions[state.qIdx];
+  el.innerHTML = `<div class="quiz-card">
+    <div class="quiz-meta">
+      <span class="quiz-badge">Grade 6 IB</span>
+      <span class="quiz-counter">Q${state.qIdx+1} of ${questions.length}</span>
+    </div>
+    <div class="quiz-q">${q.q}</div>
+    <div>${q.opts.map((o,i)=>`<button class="opt-btn" onclick="answer(${i})">${o}</button>`).join('')}</div>
+    <div class="feedback-box" id="fb"></div>
+    <button class="next-q-btn" id="nextBtn" onclick="nextQ()">Next question →</button>
+  </div>`;
+}
+
+function answer(idx) {
+  const q = questions[state.qIdx];
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled=true);
+  document.querySelectorAll('.opt-btn')[q.ans].classList.add('correct');
+  const fb = document.getElementById('fb');
+  if (idx===q.ans) {
+    state.quizScore++; state.xp+=5; updateXP();
+    fb.className='feedback-box show feedback-correct';
+    fb.textContent='✓ Correct! '+q.exp;
+  } else {
+    document.querySelectorAll('.opt-btn')[idx].classList.add('wrong');
+    fb.className='feedback-box show feedback-wrong';
+    fb.textContent='✗ '+q.exp;
+  }
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function nextQ() {
+  state.qIdx++;
+  if (state.qIdx>=questions.length) state.quizDone=true;
+  renderQuiz();
+}
+
+function resetQuiz() {
+  state.qIdx=0; state.quizScore=0; state.quizDone=false;
+  renderQuiz();
+}
+
+// RENDER LAB
+function renderLab() {
+  document.getElementById('labList').innerHTML = experiments.map(e=>`
+    <div class="lab-card">
+      <div class="lab-header">
+        <div class="lab-num">${e.num}</div>
+        <h3>${e.title}</h3>
+      </div>
+      <p>${e.desc}</p>
+      <div class="materials-wrap">${e.mats.map(m=>`<span class="material-chip">${m}</span>`).join('')}</div>
+      <button class="lab-btn" onclick="askLabPrompt('${e.prompt}')">Get full instructions →</button>
+    </div>
+  `).join('');
+}
+
+// RENDER CHIPS
+function renderChips() {
+  document.getElementById('promptChips').innerHTML = chips.map(c =>
+    `<button class="chip-btn" onclick="sendChip('${c}')">${c}</button>`
+  ).join('');
+}
+
+// CHAT
+async function sendQuestion() {
+  const input = document.getElementById('askInput');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value='';
+  addMessage(q, 'user');
+  await callClaude(q);
+}
+
+function sendChip(text) {
+  addMessage(text, 'user');
+  callClaude(text);
+}
+
+function askUnit(unit) {
+  showScreen('ask', document.querySelectorAll('.nav-btn')[4]);
+  const prompt = `Give me a study overview for IB MYP Grade 6 ${unit} — key concepts, important vocabulary, and one home experiment idea I can do during holidays`;
+  addMessage('Tell me about ' + unit + ' for IB Grade 6', 'user');
+  callClaude(prompt);
+}
+
+function askLabPrompt(prompt) {
+  showScreen('ask', document.querySelectorAll('.nav-btn')[4]);
+  addMessage('Get full instructions for the experiment', 'user');
+  callClaude(prompt);
+}
+
+function addMessage(text, role) {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = role==='user' ? 'msg-user' : 'msg-ai';
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+async function callClaude(question) {
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  const loadDiv = addMessage('Thinking...', 'ai');
+  loadDiv.classList.add('loading');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:'You are a friendly, encouraging science tutor for IB MYP Year 1 Grade 6 students (age 11-12). Keep explanations clear, fun, and age-appropriate. Use simple language, relatable examples, and connect concepts to real life. Keep responses concise — under 200 words unless explaining a procedure. Use bullet points or numbered steps when listing things. End with an encouraging note or a curious follow-up question.',
+        messages:[{ role:'user', content:question }]
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'Sorry, I had trouble answering that. Try again!';
+    loadDiv.textContent = reply;
+    loadDiv.classList.remove('loading');
+  } catch(err) {
+    loadDiv.textContent = 'Connection issue — please try again.';
+    loadDiv.classList.remove('loading');
+  }
+  btn.disabled = false;
+  document.getElementById('chatMessages').scrollTop = 999999;
+}
+
+// XP
+function updateXP() {
+  document.getElementById('xpBadge').textContent = '⭐ '+state.xp+' XP';
+  document.getElementById('streakPill').textContent = '🔥 '+state.streak+' day streak';
+}
+
+// NAVIGATION
+function showScreen(name, btn) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('app-content').scrollTop = 0;
+}
+
+// INIT
+renderUnits();
+renderActivities();
+renderQuiz();
+renderLab();
+renderChips();
+</script>
+</body>
+</html>
