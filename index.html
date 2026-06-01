@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SciLab 🔬</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f1a;
+  --card: #1a1a2e;
+  --card2: #16213e;
+  --border: rgba(255,255,255,0.07);
+  --text: #f0f0ff;
+  --muted: #8888aa;
+  --green: #4ade80;
+  --blue: #60a5fa;
+  --purple: #a78bfa;
+  --yellow: #fbbf24;
+  --pink: #f472b6;
+  --orange: #fb923c;
+  --nav: 68px;
+  --safe: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+}
+#scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--nav) + var(--safe) + 20px);
+  scrollbar-width: none;
+}
+#scroll::-webkit-scrollbar { display: none; }
+
+/* NAV */
+#nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  height: calc(var(--nav) + var(--safe));
+  padding-bottom: var(--safe);
+  background: rgba(15,15,26,0.95);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-around;
+  z-index: 100;
+}
+.nb {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); font-family: 'Nunito', sans-serif;
+  font-size: 10px; font-weight: 700; flex: 1; padding: 8px 0;
+  transition: color 0.2s; letter-spacing: 0.03em;
+}
+.nb .ico { font-size: 22px; line-height: 1; transition: transform 0.2s; }
+.nb.on { color: var(--text); }
+.nb.on .ico { transform: scale(1.15); }
+
+/* SCREENS */
+.sc { display: none; padding: 0 16px; animation: fadeUp 0.2s ease; }
+.sc.on { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* TYPOGRAPHY */
+.ftitle {
+  font-family: 'Fredoka One', cursive;
+  font-size: 30px; line-height: 1.1;
+  padding: 20px 0 4px;
+}
+.stitle {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); margin: 18px 0 10px;
+}
+
+/* TOP BAR */
+#topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 0;
+}
+.logo { font-family: 'Fredoka One', cursive; font-size: 22px; color: var(--green); }
+.logo span { color: var(--text); font-size: 14px; font-family: 'Nunito', sans-serif; font-weight: 700; }
+.xpbadge {
+  font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 99px;
+  background: rgba(74,222,128,0.12); color: var(--green);
+  border: 1px solid rgba(74,222,128,0.2);
+}
+
+/* HERO */
+.hero {
+  margin: 14px 0 4px;
+  background: linear-gradient(135deg, #1e1b4b, #1e3a5f);
+  border: 1px solid rgba(96,165,250,0.2);
+  border-radius: 20px; padding: 20px; position: relative; overflow: hidden;
+}
+.hero::after {
+  content: '🔬'; position: absolute; right: 16px; top: 50%;
+  transform: translateY(-50%); font-size: 52px; opacity: 0.15;
+}
+.hero-sub { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin-bottom: 6px; }
+.hero h2 { font-family: 'Fredoka One', cursive; font-size: 22px; margin-bottom: 14px; line-height: 1.3; }
+.pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill {
+  padding: 5px 12px; border-radius: 99px; font-size: 12px; font-weight: 700; border: 1px solid;
+}
+.pill-g { background: rgba(74,222,128,0.1); color: var(--green); border-color: rgba(74,222,128,0.2); }
+.pill-o { background: rgba(251,146,60,0.1); color: var(--orange); border-color: rgba(251,146,60,0.2); }
+
+/* UNIT GRID */
+.ugrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ucard {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 18px; padding: 16px; cursor: pointer;
+  transition: transform 0.15s, border-color 0.2s;
+}
+.ucard:active { transform: scale(0.96); }
+.ucard:hover { border-color: rgba(255,255,255,0.15); }
+.uemoji { font-size: 28px; margin-bottom: 8px; display: block; }
+.ucard h3 { font-size: 13px; font-weight: 900; margin-bottom: 3px; line-height: 1.3; }
+.ucard p { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.upbar { margin-top: 10px; height: 4px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+.upfill { height: 100%; border-radius: 99px; }
+
+/* DAY HEADER */
+.day-header {
+  background: linear-gradient(135deg, #1a2744, #1e1b4b);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 20px; padding: 18px; margin: 14px 0 16px;
+  display: flex; align-items: center; gap: 14px;
+}
+.day-num {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: rgba(167,139,250,0.15);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.day-num .dn { font-family: 'Fredoka One', cursive; font-size: 24px; color: var(--purple); line-height: 1; }
+.day-num .dl { font-size: 9px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.day-info h2 { font-family: 'Fredoka One', cursive; font-size: 18px; margin-bottom: 4px; }
+.day-info p { font-size: 12px; color: var(--muted); }
+
+/* ACTIVITY CARD */
+.acard {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; margin-bottom: 12px; overflow: hidden;
+}
+.acard-top {
+  padding: 16px; display: flex; gap: 12px; align-items: flex-start;
+  cursor: pointer;
+}
+.acard-top:active { opacity: 0.85; }
+.aicon {
+  width: 48px; height: 48px; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+}
+.abody { flex: 1; min-width: 0; }
+.abody h3 { font-size: 15px; font-weight: 900; margin-bottom: 4px; line-height: 1.3; }
+.abody p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.atags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.atag {
+  font-size: 10px; font-weight: 700; padding: 3px 9px;
+  border-radius: 99px; letter-spacing: 0.03em;
+}
+.tg { background: rgba(74,222,128,0.1); color: var(--green); }
+.tb { background: rgba(96,165,250,0.1); color: var(--blue); }
+.tp { background: rgba(167,139,250,0.1); color: var(--purple); }
+.ty { background: rgba(251,191,36,0.1); color: var(--yellow); }
+.to { background: rgba(251,146,60,0.1); color: var(--orange); }
+
+.achk {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.12);
+  background: none; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 15px; flex-shrink: 0; transition: all 0.2s;
+}
+.achk.done { background: rgba(74,222,128,0.15); border-color: var(--green); color: var(--green); }
+
+/* STEPS */
+.steps-wrap { display: none; border-top: 1px solid var(--border); padding: 16px; }
+.steps-wrap.open { display: block; }
+.steps-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.step {
+  display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px;
+}
+.step:last-child { margin-bottom: 0; }
+.snum {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; flex-shrink: 0; margin-top: 1px;
+}
+.stext { font-size: 13px; line-height: 1.6; color: var(--text); flex: 1; }
+.stext strong { font-weight: 900; }
+.expand-btn {
+  width: 100%; padding: 10px; font-size: 12px; font-weight: 700;
+  font-family: 'Nunito', sans-serif; background: none;
+  border: none; border-top: 1px solid var(--border);
+  color: var(--muted); cursor: pointer; transition: color 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.expand-btn:hover { color: var(--text); }
+.expand-arrow { transition: transform 0.2s; font-style: normal; }
+.expand-arrow.open { transform: rotate(180deg); }
+
+/* QUIZ */
+.qcard { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 12px; }
+.qmeta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.qbadge { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: 99px; background: rgba(96,165,250,0.1); color: var(--blue); }
+.qcount { font-size: 12px; color: var(--muted); font-weight: 700; }
+.qq { font-family: 'Fredoka One', cursive; font-size: 20px; line-height: 1.3; margin-bottom: 18px; }
+.opt {
+  width: 100%; text-align: left; padding: 13px 16px; margin-bottom: 8px;
+  font-size: 14px; font-weight: 700; font-family: 'Nunito', sans-serif;
+  border: 1.5px solid rgba(255,255,255,0.08); border-radius: 12px;
+  background: rgba(255,255,255,0.03); color: var(--text); cursor: pointer;
+  transition: all 0.15s;
+}
+.opt:active { transform: scale(0.98); }
+.opt.correct { background: rgba(74,222,128,0.12); border-color: var(--green); color: var(--green); }
+.opt.wrong { background: rgba(244,114,182,0.1); border-color: var(--pink); color: var(--pink); }
+.fb { padding: 12px 14px; border-radius: 12px; font-size: 13px; line-height: 1.6; display: none; margin: 8px 0; }
+.fb.show { display: block; }
+.fb.ok { background: rgba(74,222,128,0.08); color: #86efac; border: 1px solid rgba(74,222,128,0.2); }
+.fb.no { background: rgba(244,114,182,0.08); color: #f9a8d4; border: 1px solid rgba(244,114,182,0.2); }
+.nxtbtn {
+  width: 100%; padding: 13px; font-size: 14px; font-weight: 900;
+  font-family: 'Nunito', sans-serif; background: rgba(74,222,128,0.1);
+  color: var(--green); border: 1.5px solid rgba(74,222,128,0.2);
+  border-radius: 12px; cursor: pointer; display: none; margin-top: 4px;
+  transition: all 0.15s;
+}
+.nxtbtn.show { display: block; }
+.nxtbtn:active { transform: scale(0.98); }
+.score-wrap { text-align: center; padding: 32px 16px; }
+.score-big { font-family: 'Fredoka One', cursive; font-size: 80px; color: var(--green); line-height: 1; }
+.score-sub { font-size: 14px; color: var(--muted); margin-top: 6px; }
+.score-msg { font-family: 'Fredoka One', cursive; font-size: 22px; margin-top: 16px; }
+.retry { margin-top: 20px; padding: 13px 28px; font-size: 14px; font-weight: 700; font-family: 'Nunito', sans-serif; background: rgba(255,255,255,0.05); color: var(--text); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; }
+
+/* LAB */
+.lcard { background: var(--card); border: 1px solid var(--border); border-radius: 20px; margin-bottom: 12px; overflow: hidden; }
+.lcard-top { padding: 18px; }
+.lhead { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.lnum { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka One', cursive; font-size: 16px; background: rgba(96,165,250,0.12); color: var(--blue); flex-shrink: 0; }
+.lhead h3 { font-size: 15px; font-weight: 900; line-height: 1.3; }
+.lcard p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+.mats { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
+.mat { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 99px; background: rgba(255,255,255,0.04); color: var(--muted); border: 1px solid var(--border); }
+.lsteps { border-top: 1px solid var(--border); padding: 16px; }
+.lstep { display: flex; gap: 11px; margin-bottom: 12px; align-items: flex-start; }
+.lstep:last-child { margin-bottom: 0; }
+.lsn { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; flex-shrink: 0; background: rgba(96,165,250,0.12); color: var(--blue); margin-top: 1px; }
+.lst { font-size: 13px; line-height: 1.6; flex: 1; }
+.lask { width: 100%; padding: 12px; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; background: rgba(96,165,250,0.08); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); border-top: 1px solid var(--border); border-radius: 0 0 20px 20px; cursor: pointer; transition: all 0.15s; }
+.lask:active { opacity: 0.8; }
+
+/* ASK */
+.ask-intro { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin: 14px 0 16px; }
+.ask-intro h2 { font-family: 'Fredoka One', cursive; font-size: 22px; margin-bottom: 6px; }
+.ask-intro p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { white-space: nowrap; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; padding: 8px 14px; border-radius: 99px; background: var(--card); color: var(--muted); border: 1px solid var(--border); cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
+.chip:active { color: var(--text); transform: scale(0.97); }
+.msgs { display: flex; flex-direction: column; gap: 10px; min-height: 40px; margin-bottom: 14px; }
+.mu { padding: 11px 14px; border-radius: 16px 16px 4px 16px; font-size: 14px; line-height: 1.6; max-width: 86%; align-self: flex-end; background: rgba(96,165,250,0.12); color: #bfdbfe; border: 1px solid rgba(96,165,250,0.2); }
+.ma { padding: 11px 14px; border-radius: 4px 16px 16px 16px; font-size: 14px; line-height: 1.6; max-width: 90%; align-self: flex-start; background: var(--card2); color: var(--text); border: 1px solid var(--border); }
+.ma.thinking { color: var(--muted); font-style: italic; }
+.input-row { display: flex; gap: 8px; align-items: flex-end; }
+.ainput { flex: 1; padding: 12px 14px; font-size: 14px; font-family: 'Nunito', sans-serif; background: var(--card); color: var(--text); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 12px; outline: none; resize: none; height: 48px; line-height: 1.4; }
+.ainput:focus { border-color: rgba(96,165,250,0.4); }
+.sbtn { width: 48px; height: 48px; border-radius: 12px; background: var(--blue); color: #0f172a; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.15s; flex-shrink: 0; font-weight: 900; }
+.sbtn:active { transform: scale(0.92); }
+.sbtn:disabled { opacity: 0.4; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="logo">SciLab <span>IB Grade 6</span></div>
+  <div class="xpbadge" id="xpbadge">⭐ 0 XP</div>
+</div>
+
+<div id="scroll">
+
+  <!-- HOME -->
+  <div class="sc on" id="sc-home">
+    <div class="ftitle">Hello,<br><span style="color:var(--green)">Scientist! 🧪</span></div>
+    <div class="hero">
+      <div class="hero-sub">IB MYP Year 1</div>
+      <h2>Your holiday<br>science adventure</h2>
+      <div class="pills">
+        <div class="pill pill-g" id="streakpill">🔥 0 day streak</div>
+        <div class="pill pill-o">6 units to explore</div>
+      </div>
+    </div>
+    <div class="stitle">Science units</div>
+    <div class="ugrid" id="ugrid"></div>
+  </div>
+
+  <!-- DAILY -->
+  <div class="sc" id="sc-daily">
+    <div class="day-header" id="dayheader"></div>
+    <div id="alist"></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="sc" id="sc-quiz">
+    <div class="ftitle" style="color:var(--purple)">Quiz Time! 🧠</div>
+    <div id="qarea"></div>
+  </div>
+
+  <!-- LAB -->
+  <div class="sc" id="sc-lab">
+    <div class="ftitle" style="color:var(--blue)">Home Lab 🧪</div>
+    <div id="llist"></div>
+  </div>
+
+  <!-- ASK -->
+  <div class="sc" id="sc-ask">
+    <div class="ftitle" style="color:var(--yellow)">Ask Anything! 💬</div>
+    <div class="ask-intro">
+      <h2>Your AI Science Tutor</h2>
+      <p>Ask anything about Grade 6 IB Science — I'll explain it in a fun, simple way! ✨ Free, no login needed.</p>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="msgs" id="msgs"></div>
+    <div class="input-row">
+      <textarea class="ainput" id="ainput" placeholder="Ask a science question..."></textarea>
+      <button class="sbtn" id="sbtn" onclick="sendQ()">➤</button>
+    </div>
+  </div>
+
+</div>
+
+<nav id="nav">
+  <button class="nb on" onclick="go('home',this)"><span class="ico">🏠</span>Home</button>
+  <button class="nb" onclick="go('daily',this)"><span class="ico">📅</span>Daily</button>
+  <button class="nb" onclick="go('quiz',this)"><span class="ico">🧠</span>Quiz</button>
+  <button class="nb" onclick="go('lab',this)"><span class="ico">🔬</span>Lab</button>
+  <button class="nb" onclick="go('ask',this)"><span class="ico">💬</span>Ask</button>
+</nav>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+const S = { xp:0, streak:0, done:{}, qidx:0, qscore:0, qdone:false };
+
+// ─── UNITS ───────────────────────────────────────────────
+const units = [
+  { e:'🦠', t:'Biology', s:'Cells & Living Things', c:'var(--green)', p:40 },
+  { e:'⚗️', t:'Chemistry', s:'Matter & Materials', c:'var(--blue)', p:25 },
+  { e:'⚡', t:'Physics', s:'Forces & Energy', c:'var(--yellow)', p:15 },
+  { e:'🌍', t:'Earth & Space', s:'Solar System & Weather', c:'var(--purple)', p:55 },
+  { e:'🔍', t:'Inquiry', s:'Scientific Method', c:'var(--orange)', p:30 },
+  { e:'♻️', t:'Environment', s:'Sustainability', c:'var(--green)', p:0 },
+];
+
+// ─── ALL ACTIVITIES (rotate by day) ──────────────────────
+const allActivities = [
+  {
+    id:'act1', emoji:'🔬', title:'Cell Observation Sketch',
+    desc:'Become a cell detective! Look closely at everyday objects under bright light and find hidden cell patterns.',
+    tags:[{t:'🦠 Biology',c:'tg'},{t:'⏱ 20 min',c:'tb'}],
+    bg:'rgba(74,222,128,0.12)', color:'var(--green)',
+    steps:[
+      { t:'Gather your tools', d:'You need a piece of onion skin, a bright torch or lamp, and your notebook.' },
+      { t:'Peel a thin layer', d:'Carefully peel off a very thin, almost see-through layer from the inside of an onion.' },
+      { t:'Hold it up to light', d:'Hold the thin layer between your fingers and shine the torch through it. Look closely — can you see tiny rectangular shapes?' },
+      { t:'Draw what you see', d:'In your notebook, sketch the shapes. They should look like a brick wall pattern — those are the <strong>cell walls!</strong>' },
+      { t:'Label your diagram', d:'Label these parts: Cell wall (outer box), Cell membrane (thin inner line), Cytoplasm (the jelly inside). 🎉' },
+      { t:'Think about it', d:'Write one sentence: "I think plant cells look like bricks because..." There is no wrong answer!' },
+    ]
+  },
+  {
+    id:'act2', emoji:'⚗️', title:'Kitchen Chemistry Lab',
+    desc:'Your kitchen is a science lab! Discover the difference between mixtures and solutions using everyday stuff.',
+    tags:[{t:'⚗️ Chemistry',c:'tb'},{t:'⏱ 25 min',c:'ty'}],
+    bg:'rgba(96,165,250,0.12)', color:'var(--blue)',
+    steps:[
+      { t:'Set up 3 cups', d:'Label them A, B, and C. Fill each halfway with water from the tap.' },
+      { t:'Cup A — Salt water', d:'Add a teaspoon of salt. Stir for 30 seconds. Does it disappear? This is a <strong>solution</strong> — the salt dissolved!' },
+      { t:'Cup B — Sandy water', d:'Add a teaspoon of sand or soil. Stir hard. Wait 1 minute. The sand sinks — this is a <strong>suspension</strong>.' },
+      { t:'Cup C — Oil water', d:'Add a tablespoon of cooking oil. Stir vigorously. Watch what happens after 30 seconds — they separate! Oil and water don\'t mix.' },
+      { t:'Record your results', d:'Draw a table with 3 columns: Mixture | Can you see the parts? | Does it separate? Fill in Yes or No for each cup.' },
+      { t:'The big question', d:'Which cup is a TRUE solution? (Hint: you cannot see the parts at all.) Write your answer and why!' },
+    ]
+  },
+  {
+    id:'act3', emoji:'📊', title:'Temperature Scientist',
+    desc:'Collect REAL scientific data! Measure temperature changes throughout the day like a professional scientist.',
+    tags:[{t:'🔍 Inquiry',c:'tp'},{t:'⏱ All day',c:'to'}],
+    bg:'rgba(167,139,250,0.12)', color:'var(--purple)',
+    steps:[
+      { t:'Write your hypothesis', d:'Before you start, predict: "I think the temperature will be highest at ___ o\'clock because..."' },
+      { t:'Set up your data table', d:'Draw a table: Time | Room Temp | Outside Temp (if possible). You\'ll record every 2 hours.' },
+      { t:'Take your first reading', d:'Note the time, then record the temperature. If you have a thermometer, place it away from direct sunlight.' },
+      { t:'Repeat every 2 hours', d:'At 8am, 10am, 12pm, 2pm, 4pm and 6pm. Keep your notebook handy!' },
+      { t:'Draw your graph', d:'Plot your readings on a line graph. Time goes on the x-axis (bottom), temperature on the y-axis (side).' },
+      { t:'Analyse your results', d:'Was your hypothesis correct? Write 2 sentences about your results. What might have caused any changes?' },
+    ]
+  },
+  {
+    id:'act4', emoji:'🌱', title:'Photosynthesis Experiment',
+    desc:'Find out if leaves really do need light to make food. This one takes 2 days but the result is mind-blowing!',
+    tags:[{t:'🦠 Biology',c:'tg'},{t:'⏱ 2 days',c:'to'}],
+    bg:'rgba(74,222,128,0.12)', color:'var(--green)',
+    steps:[
+      { t:'Write your prediction', d:'Hypothesis: "If I block sunlight from half a leaf, then... because plants use light to..."' },
+      { t:'Prepare the leaf', d:'Find a large leaf still attached to a plant (a pot plant works great!). Cut a small piece of black tape or foil.' },
+      { t:'Cover half the leaf', d:'Attach the tape to completely cover ONE half of the leaf. Leave the other half in the light. Leave for 2 days.' },
+      { t:'Remove the leaf (Day 2)', d:'After 48 hours, carefully remove the leaf. Peel off the tape.' },
+      { t:'The iodine test', d:'With an adult\'s help, dip the leaf in iodine solution (from a pharmacy). The dark half will turn BLACK — that\'s starch from photosynthesis!' },
+      { t:'Explain your results', d:'Which half turned black? Why? Write: "The covered half did NOT turn black because..." Connect it to photosynthesis! 🌿' },
+    ]
+  },
+  {
+    id:'act5', emoji:'🌍', title:'Rock & Soil Detective',
+    desc:'Go on a geological treasure hunt in your garden, park, or street! Every rock has a story to tell.',
+    tags:[{t:'🌍 Earth',c:'tp'},{t:'⏱ 30 min',c:'tb'}],
+    bg:'rgba(167,139,250,0.12)', color:'var(--purple)',
+    steps:[
+      { t:'Go exploring', d:'Walk around your home, garden or a nearby park. Collect 5 different looking rocks or soil samples.' },
+      { t:'Observe carefully', d:'For each sample, note: Colour, Texture (rough/smooth?), Weight (heavy/light?), Any sparkle or crystals?' },
+      { t:'The scratch test', d:'Try scratching each rock with your fingernail, then a coin, then a key. Harder minerals scratch softer ones. Note which scratch which!' },
+      { t:'The water test', d:'Drop a few drops of water on each rock. Does it absorb? Does it run off? Sandy rocks absorb, smooth rocks repel.' },
+      { t:'Classify your rocks', d:'Sort them into 3 groups: Igneous (formed from lava), Sedimentary (formed in layers), or Metamorphic (changed by heat/pressure).' },
+      { t:'Make a display', d:'Arrange your 5 rocks, label each one with what you discovered. Take a photo — you made a proper geology collection! 🪨' },
+    ]
+  },
+  {
+    id:'act6', emoji:'⚡', title:'Simple Circuit Builder',
+    desc:'Light up a bulb using just a battery and a wire! Understand electricity by making it flow with your own hands.',
+    tags:[{t:'⚡ Physics',c:'ty'},{t:'⏱ 25 min',c:'tb'}],
+    bg:'rgba(251,191,36,0.12)', color:'var(--yellow)',
+    steps:[
+      { t:'Gather your materials', d:'You need: 1 AA battery, 30cm of copper wire (or a phone charging cable stripped at ends), and a small LED bulb from a torch.' },
+      { t:'The first test', d:'Touch the wire to the positive (+) end of the battery, then touch the other end of the wire to the long leg of the LED. Does it light up?' },
+      { t:'Complete the circuit', d:'The electricity needs a complete LOOP. Connect: Battery (+) → wire → LED → wire → Battery (−). The bulb should glow!' },
+      { t:'Test insulators', d:'Try putting different materials between the wire connections: plastic, rubber, a coin, a pencil, your finger. What allows electricity to flow?' },
+      { t:'Draw the circuit', d:'Draw your circuit using these symbols: Battery (long + short lines), Wire (straight line), Bulb (circle with X inside).' },
+      { t:'The big idea', d:'Write: "Electricity can only flow when the circuit is ___. Materials that allow flow are called ___ . Materials that stop flow are called ___." 💡' },
+    ]
+  },
+  {
+    id:'act7', emoji:'🫧', title:'Surface Tension Explorer',
+    desc:'Watch water do something almost magical — hold objects that should sink! Discover surface tension.',
+    tags:[{t:'⚗️ Chemistry',c:'tb'},{t:'⏱ 15 min',c:'tg'}],
+    bg:'rgba(96,165,250,0.12)', color:'var(--blue)',
+    steps:[
+      { t:'Fill a glass to the brim', d:'Fill a drinking glass completely full of water — right to the very top edge.' },
+      { t:'The coin challenge', d:'Carefully drop coins one by one into the full glass. How many can you add before it overflows? Guess first!' },
+      { t:'Float a paperclip', d:'VERY gently lay a paperclip flat on the surface of a fresh glass of water. It should float — even though metal sinks!' },
+      { t:'Add washing-up liquid', d:'Put ONE drop of washing-up liquid near the floating paperclip. What happens instantly? The surface tension breaks!' },
+      { t:'Pepper trick', d:'Sprinkle pepper on fresh water. Touch the centre with a soapy finger. The pepper races to the edges — just like viruses avoid soap!' },
+      { t:'Explain it', d:'Surface tension is water molecules holding hands at the surface. Write: "Soap breaks surface tension by..." Connect to why we wash hands! 🧼' },
+    ]
+  },
+  {
+    id:'act8', emoji:'🌈', title:'Make a Rainbow Spectrometer',
+    desc:'Split white light into all its colours using things you already have at home!',
+    tags:[{t:'⚡ Physics',c:'ty'},{t:'⏱ 20 min',c:'tg'}],
+    bg:'rgba(251,191,36,0.12)', color:'var(--yellow)',
+    steps:[
+      { t:'Get your materials', d:'You need: a CD or DVD, a white piece of paper, a torch or sunlight, and your notebook.' },
+      { t:'CD rainbow', d:'Hold a CD so the shiny side faces a light source. Move it until you see colours reflect onto your hand or a white wall.' },
+      { t:'Record the colours', d:'Draw the rainbow you see. Write the colours in order from the outside in. ROYGBIV — Red, Orange, Yellow, Green, Blue, Indigo, Violet.' },
+      { t:'Water prism', d:'Fill a glass of water and place it on a white piece of paper in sunlight. A rainbow should appear on the paper below!' },
+      { t:'Compare your two rainbows', d:'Are the colours in the same order in both experiments? Measure (roughly) how wide each colour band is.' },
+      { t:'The science', d:'White light is made of ALL colours mixed together. Write: "When light passes through water or a CD, it bends different amounts because..." 🌈' },
+    ]
+  },
+  {
+    id:'act9', emoji:'🫁', title:'Breathing & Lung Model',
+    desc:'Build a model of lungs using a bottle and balloons to see how you breathe!',
+    tags:[{t:'🦠 Biology',c:'tg'},{t:'⏱ 30 min',c:'tb'}],
+    bg:'rgba(74,222,128,0.12)', color:'var(--green)',
+    steps:[
+      { t:'Gather materials', d:'Empty plastic bottle, 2 small balloons, 1 large balloon, scissors, and sticky tape.' },
+      { t:'Cut the bottle', d:'With adult help, cut the bottom off the plastic bottle. This is your "chest cavity".' },
+      { t:'Make the lungs', d:'Put two small balloons inside the bottle through the neck, stretching their openings over the bottle mouth (taped in place). These are your LUNGS.' },
+      { t:'Make the diaphragm', d:'Stretch the large balloon over the cut bottom of the bottle and secure it. This is your DIAPHRAGM muscle.' },
+      { t:'Test it', d:'Pull the large balloon DOWN — the small balloons inside inflate (inhaling!). Push it UP — the small balloons deflate (exhaling!)' },
+      { t:'The science', d:'Write: "When the diaphragm moves down, the chest space gets ___ , air pressure gets ___ , so air rushes ___." 🫁' },
+    ]
+  },
+  {
+    id:'act10', emoji:'🧲', title:'Magnetic Field Mapping',
+    desc:'Make invisible magnetic fields VISIBLE using a magnet and iron filings (or a compass)!',
+    tags:[{t:'⚡ Physics',c:'ty'},{t:'⏱ 20 min',c:'tp'}],
+    bg:'rgba(251,191,36,0.12)', color:'var(--yellow)',
+    steps:[
+      { t:'Get a magnet', d:'Any fridge magnet or bar magnet works. Place it flat on a table under a piece of white paper.' },
+      { t:'Compass method', d:'Place a small compass near the magnet. Draw a dot where the compass is. Mark the direction the needle points with an arrow.' },
+      { t:'Map the field', d:'Move the compass to 20 different positions around the magnet. Mark each one. Connect your dots — you\'ve drawn field lines!' },
+      { t:'Iron filings (if available)', d:'Sprinkle iron filings on the paper over the magnet. Tap the paper gently — the filings align with the field lines instantly!' },
+      { t:'Find north and south', d:'Where do the field lines come OUT of the magnet? That\'s the North Pole. Where do they go IN? That\'s the South Pole.' },
+      { t:'Earth is a magnet!', d:'Write: "Earth has a magnetic field similar to a bar magnet. This is important because it protects us from..." 🧲 Look up "solar wind"!' },
+    ]
+  },
+  {
+    id:'act11', emoji:'🌿', title:'Ecosystem in a Bottle',
+    desc:'Create your own mini ecosystem — a tiny world that recycles water and air just like Earth does!',
+    tags:[{t:'♻️ Environment',c:'tg'},{t:'⏱ 45 min',c:'to'}],
+    bg:'rgba(74,222,128,0.12)', color:'var(--green)',
+    steps:[
+      { t:'Gather materials', d:'A clear 2-litre plastic bottle, small pebbles, soil, small plant cuttings, water, and cling film.' },
+      { t:'Add the layers', d:'Layer 1: 3cm of pebbles (drainage). Layer 2: 5cm of soil. Layer 3: Plant your small plant or cuttings in the soil.' },
+      { t:'Water it gently', d:'Add just enough water so the soil is moist but not swimming. About 3 tablespoons.' },
+      { t:'Seal it up', d:'Cover the top tightly with cling film and seal with tape. Your ecosystem is now CLOSED — it recycles its own water!' },
+      { t:'Place in indirect light', d:'Put it near a window but not in direct scorching sun. Watch over the next few days — you should see water droplets forming and "raining" back down.' },
+      { t:'Observe and record', d:'Every 2 days, draw what you see. Write: "The water cycle inside my bottle works by..." Connect to the real water cycle! 💧' },
+    ]
+  },
+  {
+    id:'act12', emoji:'🔊', title:'Sound Wave Visualiser',
+    desc:'Make sound waves VISIBLE by making rice dance on a speaker! See how sound travels as vibrations.',
+    tags:[{t:'⚡ Physics',c:'ty'},{t:'⏱ 20 min',c:'tg'}],
+    bg:'rgba(251,191,36,0.12)', color:'var(--yellow)',
+    steps:[
+      { t:'Set up your visualiser', d:'Stretch cling film tightly over a bowl or pot — like a drum skin. Sprinkle a pinch of rice or salt on top.' },
+      { t:'The voice test', d:'Hold the bowl near your mouth and speak loudly directly at it. Does the rice move? Try different vowel sounds — A E I O U.' },
+      { t:'The speaker test', d:'Place the bowl on top of a speaker or near a phone playing music. Turn up the volume slowly. Watch the rice jump and dance!' },
+      { t:'Change the pitch', d:'Play a low bass note, then a high note. Does the rice pattern change? Low sounds make big slow jumps, high sounds make fast tiny jumps.' },
+      { t:'Measure the effect', d:'From what distance can you make the rice move with your voice? Measure it! Record: Distance | Did rice move? (Yes/No)' },
+      { t:'Explain sound', d:'Write: "Sound travels as ___. When the vibrations reach the cling film, it ___. Higher pitch means ___ vibrations per second." 🔊' },
+    ]
+  },
+  {
+    id:'act13', emoji:'🌡️', title:'Heat Transfer Investigation',
+    desc:'Discover the 3 ways heat moves — conduction, convection, and radiation — using cups of hot water.',
+    tags:[{t:'⚡ Physics',c:'ty'},{t:'⏱ 35 min',c:'tp'}],
+    bg:'rgba(251,191,36,0.12)', color:'var(--yellow)',
+    steps:[
+      { t:'Safety first!', d:'Ask an adult to help with hot water. You will need 3 identical cups, hot water from the tap (not boiling), and a thermometer if you have one.' },
+      { t:'Conduction test', d:'Pour hot water in a cup. Touch a metal spoon placed in the cup after 30 seconds. Then touch a wooden spoon. Which feels warmer? Metal conducts heat!' },
+      { t:'Convection test', d:'Add one drop of food colouring to very hot (not boiling) water. Watch it swirl upward as the hot water rises and cool water sinks — that\'s convection!' },
+      { t:'Radiation test', d:'Hold your hand 10cm from a hot cup (don\'t touch!). You can feel warmth without touching — that\'s radiation, heat travelling through air as waves.' },
+      { t:'Record all three', d:'Draw a table: Type of Heat Transfer | What I Did | What I Observed | Example in real life' },
+      { t:'Real-world connections', d:'Write one example of each in daily life: Conduction = touching a hot pan. Convection = ___. Radiation = ___. 🌡️' },
+    ]
+  },
+  {
+    id:'act14', emoji:'💧', title:'Water Purification Challenge',
+    desc:'Dirty water can be cleaned! Build a simple water filter and discover how water treatment plants work.',
+    tags:[{t:'♻️ Environment',c:'tg'},{t:'⏱ 40 min',c:'to'}],
+    bg:'rgba(74,222,128,0.12)', color:'var(--green)',
+    steps:[
+      { t:'Make dirty water', d:'Mix soil, leaves, and a drop of food colouring into a cup of water. Stir well. This is your "polluted water" sample.' },
+      { t:'Build your filter', d:'Take an empty bottle cut in half. In the top half (funnel), layer from bottom to top: cotton wool, fine sand, coarse sand, small pebbles.' },
+      { t:'Test your filter', d:'Pour your dirty water slowly through the filter into the bottom half. Watch what gets trapped at each layer!' },
+      { t:'Compare before and after', d:'Hold up your original dirty water and your filtered water to the light. How much clearer is it? Does it look clean enough to drink?' },
+      { t:'Can you improve it?', d:'Try adding a layer of crushed charcoal (from a BBQ). Does it remove the colour better? This is what real water filters use!' },
+      { t:'The big picture', d:'Write: "My filter removed ___ from the water. Real water treatment plants also add ___ to kill bacteria. Clean water is important because..." 💧' },
+    ]
+  },
+];
+
+// ─── QUIZ QUESTIONS ───────────────────────────────────────
+const questions = [
+  { q:'What is the powerhouse of the cell?', opts:['Cell wall','Nucleus','Mitochondria','Ribosome'], ans:2, exp:'🔋 Mitochondria make ATP energy through cellular respiration — every cell\'s power station!' },
+  { q:'Which state of matter has definite volume but NO definite shape?', opts:['Solid','Liquid','Gas','Plasma'], ans:1, exp:'💧 Liquids keep their volume but flow to fill any container — like water in a glass!' },
+  { q:'What is the INDEPENDENT variable in an experiment?', opts:['What you measure','What you change','What stays the same','The conclusion'], ans:1, exp:'🔬 The independent variable is what YOU deliberately change. Everything else stays the same!' },
+  { q:'What force pulls objects towards Earth\'s centre?', opts:['Magnetism','Friction','Tension','Gravity'], ans:3, exp:'🌍 Gravity pulls everything with mass toward everything else. That\'s why we don\'t float away!' },
+  { q:'Which process do plants use to make their own food?', opts:['Respiration','Digestion','Photosynthesis','Excretion'], ans:2, exp:'🌱 Photosynthesis uses sunlight + water + CO₂ to make glucose. Plants are solar-powered!' },
+  { q:'What does the nucleus of a cell do?', opts:['Makes energy','Controls the cell','Protects the cell','Stores water'], ans:1, exp:'🧬 The nucleus is the cell\'s control centre — it contains DNA with all the instructions for life!' },
+  { q:'Which of these is a CHEMICAL change?', opts:['Melting ice','Cutting paper','Burning wood','Dissolving salt'], ans:2, exp:'🔥 Burning creates a NEW substance (ash + gases). You can\'t un-burn wood — it\'s irreversible!' },
+  { q:'What is the unit for measuring force?', opts:['Kilogram','Newton','Joule','Watt'], ans:1, exp:'⚡ The Newton (N) is named after Isaac Newton. 1 Newton is roughly the force of a small apple on your hand!' },
+  { q:'What gas do plants absorb during photosynthesis?', opts:['Oxygen','Nitrogen','Carbon dioxide','Hydrogen'], ans:2, exp:'🌿 Plants breathe in CO₂ and breathe out O₂ — the opposite of us! That\'s why forests are called the lungs of the Earth.' },
+  { q:'What is the formula for density?', opts:['Mass × Volume','Mass ÷ Volume','Volume ÷ Mass','Mass + Volume'], ans:1, exp:'⚗️ Density = Mass ÷ Volume. More mass in the same space = denser. That\'s why metal sinks and wood floats!' },
+  { q:'Which layer is the outermost part of the Earth?', opts:['Mantle','Inner core','Outer core','Crust'], ans:3, exp:'🌍 The crust is the thin outermost layer we live on — like the skin of an apple compared to the whole fruit!' },
+  { q:'What type of energy does a stretched rubber band have?', opts:['Kinetic energy','Thermal energy','Elastic potential energy','Chemical energy'], ans:2, exp:'🤸 Elastic potential energy is stored energy in a stretched or squashed object. Release it and it becomes kinetic!' },
+  { q:'What is a food chain?', opts:['A list of foods','The order energy flows from one organism to another','A type of chemical bond','How animals move'], ans:1, exp:'🍃 Food chains show how energy flows: Sun → Plant → Herbivore → Carnivore. Energy is transferred at each step!' },
+  { q:'What is the name for a substance that cannot be broken down into simpler substances?', opts:['Compound','Mixture','Element','Molecule'], ans:2, exp:'⚛️ An element is a pure substance made of only one type of atom. Gold, carbon, and oxygen are all elements!' },
+  { q:'What happens to particles when a solid is heated and melts?', opts:['They stop moving','They move faster and spread out','They shrink','They disappear'], ans:1, exp:'🔥 Heating gives particles more energy so they vibrate faster and break free from their fixed positions — solid becomes liquid!' },
+];
+
+// ─── EXPERIMENTS ──────────────────────────────────────────
+const experiments = [
+  {
+    num:'01', emoji:'🏗️', title:'Density Tower',
+    desc:'Layer 5 liquids of different densities to build a rainbow tower that looks like magic but is pure science!',
+    mats:['honey','dish soap','water','cooking oil','rubbing alcohol','tall glass','food colouring (optional)'],
+    steps:[
+      'Pour honey into the bottom of a tall glass (about 2cm deep). Pour slowly down the side.',
+      'SLOWLY pour dish soap on top. It should float on the honey — pour over a spoon to slow it down.',
+      'Mix water with a drop of food colouring. SLOWLY pour it on top of the soap.',
+      'SLOWLY add cooking oil on top of the water. Watch it separate!',
+      'Finally, SLOWLY add rubbing alcohol. It should sit on top of everything.',
+      'Now drop small objects: a grape, a piece of plastic, a small metal screw. Where do they settle? Why?',
+    ],
+    prompt:'Explain the density tower experiment for IB grade 6 — why do the layers form and what is density?'
+  },
+  {
+    num:'02', emoji:'🫁', title:'Lung Capacity',
+    desc:'Measure the volume of your lungs using just a balloon! Compare with your family.',
+    mats:['balloon','ruler or tape measure','notebook','pen'],
+    steps:[
+      'Take a normal breath in (don\'t take an extra big breath — be natural!).',
+      'Put the balloon to your lips and blow out ALL your air in one go.',
+      'Pinch the balloon closed immediately. Measure the circumference (distance around the widest part).',
+      'Use the formula: Volume ≈ circumference ÷ π × circumference ÷ π × circumference ÷ π ÷ 6 (or just compare sizes!).',
+      'Test 5 different people — children, adults, someone sporty. Record all results in a table.',
+      'Who has the biggest lung capacity? Predict WHY before you check — is it age? Height? Exercise habits?',
+    ],
+    prompt:'How does the balloon lung capacity experiment connect to IB MYP Grade 6 biology and the respiratory system?'
+  },
+  {
+    num:'03', emoji:'🎨', title:'Chromatography Art',
+    desc:'Watch ink separate into hidden colours using just paper and water — it\'s like magic from chemistry!',
+    mats:['coffee filter paper or paper towels','washable markers (black gives best results)','water','a dropper or straw','glass or bowl'],
+    steps:[
+      'Cut a strip of coffee filter paper about 15cm long and 3cm wide.',
+      'Draw a thick line of BLACK marker about 2cm from the bottom of the strip.',
+      'Hang the strip so the bottom just touches water in a glass — the ink line must be ABOVE the water.',
+      'Watch the water creep UP the paper. When it reaches the ink, the ink starts to separate!',
+      'Leave for 10 minutes until the water reaches near the top. Remove and let dry.',
+      'Count how many colours appeared from the "black" ink. Black is actually a MIX of colours! Label each colour band.',
+    ],
+    prompt:'Explain paper chromatography for IB Grade 6 chemistry — why do different colours travel different distances?'
+  },
+  {
+    num:'04', emoji:'⏱️', title:'Pendulum Physics',
+    desc:'A swinging weight seems simple but hides surprising science. What actually controls how fast it swings?',
+    mats:['string (3 pieces: 20cm, 30cm, 40cm)','coins or a small weight','tape','timer (phone works)','ruler'],
+    steps:[
+      'Make a pendulum: tie a coin to the end of the 30cm string. Tape the other end to a table edge so it swings freely.',
+      'Pull it back 10cm and release. Count how many FULL swings in 30 seconds. Write it down.',
+      'Change ONLY the string length to 20cm. Keep the same coin, same 10cm pull. Count swings again.',
+      'Now try 40cm string. Count swings. You should notice longer string = slower swings!',
+      'Now keep the 30cm string but try a HEAVIER weight (2 coins). Does the mass affect the speed? (Spoiler: it doesn\'t!)',
+      'Write your conclusion: "The independent variable that affects the pendulum period is ___ because..."',
+    ],
+    prompt:'Help me write a pendulum experiment report for IB Grade 6 scientific inquiry including hypothesis, variables, and conclusion.'
+  },
+  {
+    num:'05', emoji:'🌱', title:'Seed Germination',
+    desc:'Grow plants under different conditions and discover exactly what seeds need to sprout!',
+    mats:['8 bean or lentil seeds','4 small cups or zip-lock bags','soil or cotton wool','water','labels','ruler'],
+    steps:[
+      'Set up 4 conditions: Cup 1: Warm + Light + Water. Cup 2: Warm + Dark + Water. Cup 3: Cold (fridge) + Light + Water. Cup 4: Warm + Light + NO water.',
+      'Plant 2 seeds in each cup at the same depth (about 1cm). Label everything clearly.',
+      'Write your hypothesis: "I predict the seeds will grow best in Cup ___ because plants need..."',
+      'Check every day for 7 days. Measure any sprouts with a ruler and record in your table.',
+      'On Day 7, compare all 4 cups. Which grew best? Which didn\'t sprout at all?',
+      'Write a conclusion connecting to IB science: "Seeds need ___, ___, and ___ to germinate. The variable that had the biggest effect was ___ because..."',
+    ],
+    prompt:'What are the best independent and dependent variables for a seed germination experiment for IB MYP Grade 6?'
+  },
+];
+
+// ─── PROMPTS ──────────────────────────────────────────────
+const chipPrompts = [
+  '🦠 Explain cell theory simply',
+  '📝 How to write a hypothesis',
+  '⚡ Newton\'s 3 laws of motion',
+  '🧊 Why does ice float on water?',
+  '⚗️ Physical vs chemical change',
+  '🌍 How does the water cycle work?',
+  '🔬 What is the scientific method?',
+  '🌱 How does photosynthesis work?',
+];
+
+// ─── HELPERS ──────────────────────────────────────────────
+function dayOfHoliday() {
+  // Uses day of year so activities rotate daily
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  return Math.floor(diff / oneDay);
+}
+
+function todaysActivities() {
+  const day = dayOfHoliday();
+  const idx = day % allActivities.length;
+  const idx2 = (day + 1) % allActivities.length;
+  const idx3 = (day + 2) % allActivities.length;
+  return [allActivities[idx], allActivities[idx2], allActivities[idx3]];
+}
+
+function dayName() {
+  return new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
+}
+
+function updateXP() {
+  document.getElementById('xpbadge').textContent = '⭐ ' + S.xp + ' XP';
+  document.getElementById('streakpill').textContent = '🔥 ' + S.streak + ' day streak';
+}
+
+// ─── RENDER UNITS ─────────────────────────────────────────
+function renderUnits() {
+  document.getElementById('ugrid').innerHTML = units.map(u => `
+    <div class="ucard" onclick="askUnit('${u.t}')">
+      <span class="uemoji">${u.e}</span>
+      <h3>${u.t}</h3>
+      <p>${u.s}</p>
+      <div class="upbar"><div class="upfill" style="width:${u.p}%;background:${u.c}"></div></div>
+    </div>
+  `).join('');
+}
+
+// ─── RENDER DAILY ─────────────────────────────────────────
+function renderDaily() {
+  const acts = todaysActivities();
+  const dayNum = dayOfHoliday() % 14 + 1;
+
+  document.getElementById('dayheader').innerHTML = `
+    <div class="day-num"><div class="dn">${dayNum}</div><div class="dl">Day</div></div>
+    <div class="day-info">
+      <h2>Today's Activities 🎯</h2>
+      <p>${dayName()} · 3 activities waiting for you!</p>
+    </div>
+  `;
+
+  document.getElementById('alist').innerHTML = acts.map((a, i) => `
+    <div class="acard" id="acard-${a.id}">
+      <div class="acard-top" onclick="toggleSteps('${a.id}')">
+        <div class="aicon" style="background:${a.bg}">${a.emoji}</div>
+        <div class="abody">
+          <h3>${a.title}</h3>
+          <p>${a.desc}</p>
+          <div class="atags">${a.tags.map(t=>`<span class="atag ${t.c}">${t.t}</span>`).join('')}</div>
+        </div>
+        <button class="achk ${S.done[a.id]?'done':''}" id="chk-${a.id}" onclick="toggleDone(event,'${a.id}')">
+          ${S.done[a.id]?'✓':''}
+        </button>
+      </div>
+      <button class="expand-btn" id="exbtn-${a.id}" onclick="toggleSteps('${a.id}')">
+        <span>See steps</span> <em class="expand-arrow" id="arr-${a.id}">▼</em>
+      </button>
+      <div class="steps-wrap" id="steps-${a.id}">
+        <div class="steps-title">Step by step 👇</div>
+        ${a.steps.map((st,si) => `
+          <div class="step">
+            <div class="snum" style="background:${a.bg};color:${a.color}">${si+1}</div>
+            <div class="stext"><strong>${st.t}:</strong> ${st.d}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleSteps(id) {
+  const sw = document.getElementById('steps-' + id);
+  const arr = document.getElementById('arr-' + id);
+  const btn = document.getElementById('exbtn-' + id);
+  const open = sw.classList.toggle('open');
+  arr.classList.toggle('open', open);
+  btn.querySelector('span').textContent = open ? 'Hide steps' : 'See steps';
+}
+
+function toggleDone(e, id) {
+  e.stopPropagation();
+  S.done[id] = !S.done[id];
+  if (S.done[id]) { S.xp += 10; S.streak++; updateXP(); }
+  const btn = document.getElementById('chk-' + id);
+  btn.className = 'achk ' + (S.done[id] ? 'done' : '');
+  btn.textContent = S.done[id] ? '✓' : '';
+}
+
+// ─── RENDER QUIZ ──────────────────────────────────────────
+function renderQuiz() {
+  const el = document.getElementById('qarea');
+  if (S.qdone) {
+    const msgs = ['🌟 Science superstar!', '🎉 Amazing work!', '👍 Great effort!', '📖 Keep practising!'];
+    const msg = S.qscore >= 4 ? msgs[1] : S.qscore >= 3 ? msgs[0] : S.qscore >= 2 ? msgs[2] : msgs[3];
+    el.innerHTML = `<div class="qcard"><div class="score-wrap">
+      <div class="score-big">${S.qscore}/${questions.length > 5 ? 5 : questions.length}</div>
+      <div class="score-sub">questions correct</div>
+      <div class="score-msg">${msg}</div>
+      <button class="retry" onclick="resetQuiz()">Try again 🔄</button>
+    </div></div>`;
+    return;
+  }
+  // Pick 5 questions seeded by day so they change daily
+  const dayQ = dayOfHoliday();
+  const pool = [];
+  for (let i = 0; i < 5; i++) pool.push(questions[(dayQ + i * 3) % questions.length]);
+
+  const q = pool[S.qidx];
+  el.innerHTML = `<div class="qcard">
+    <div class="qmeta">
+      <span class="qbadge">IB Grade 6 · Science</span>
+      <span class="qcount">Q${S.qidx+1} of 5</span>
+    </div>
+    <div class="qq">${q.q}</div>
+    ${q.opts.map((o,i) => `<button class="opt" onclick="answer(${i})">${o}</button>`).join('')}
+    <div class="fb" id="fb"></div>
+    <button class="nxtbtn" id="nxt" onclick="nextQ()">Next question →</button>
+  </div>`;
+}
+
+function answer(idx) {
+  const dayQ = dayOfHoliday();
+  const pool = [];
+  for (let i = 0; i < 5; i++) pool.push(questions[(dayQ + i * 3) % questions.length]);
+  const q = pool[S.qidx];
+  document.querySelectorAll('.opt').forEach(b => b.disabled = true);
+  document.querySelectorAll('.opt')[q.ans].classList.add('correct');
+  const fb = document.getElementById('fb');
+  if (idx === q.ans) {
+    S.qscore++; S.xp += 5; updateXP();
+    fb.className = 'fb show ok';
+    fb.textContent = q.exp;
+  } else {
+    document.querySelectorAll('.opt')[idx].classList.add('wrong');
+    fb.className = 'fb show no';
+    fb.textContent = '✗ Not quite — ' + q.exp;
+  }
+  document.getElementById('nxt').classList.add('show');
+}
+
+function nextQ() {
+  S.qidx++;
+  if (S.qidx >= 5) S.qdone = true;
+  renderQuiz();
+}
+
+function resetQuiz() {
+  S.qidx = 0; S.qscore = 0; S.qdone = false;
+  renderQuiz();
+}
+
+// ─── RENDER LAB ───────────────────────────────────────────
+function renderLab() {
+  document.getElementById('llist').innerHTML = experiments.map(e => `
+    <div class="lcard">
+      <div class="lcard-top">
+        <div class="lhead">
+          <div class="lnum">${e.emoji}</div>
+          <h3>${e.title}</h3>
+        </div>
+        <p>${e.desc}</p>
+        <div class="mats">${e.mats.map(m => `<span class="mat">${m}</span>`).join('')}</div>
+      </div>
+      <div class="lsteps">
+        <div class="steps-title">How to do it 👇</div>
+        ${e.steps.map((st,i) => `
+          <div class="lstep">
+            <div class="lsn">${i+1}</div>
+            <div class="lst">${st}</div>
+          </div>
+        `).join('')}
+      </div>
+      <button class="lask" onclick="askLab('${e.prompt}')">💬 Ask AI for more help →</button>
+    </div>
+  `).join('');
+}
+
+// ─── RENDER CHIPS ─────────────────────────────────────────
+function renderChips() {
+  document.getElementById('chips').innerHTML = chipPrompts.map(c =>
+    `<button class="chip" onclick="sendChip('${c}')">${c}</button>`
+  ).join('');
+}
+
+// ─── CHAT / AI ────────────────────────────────────────────
+function addMsg(text, role) {
+  const msgs = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.className = role === 'user' ? 'mu' : 'ma';
+  d.textContent = text;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+  return d;
+}
+
+async function callAI(question) {
+  const btn = document.getElementById('sbtn');
+  btn.disabled = true;
+  const ld = addMsg('Thinking... 🤔', 'ai');
+  ld.classList.add('thinking');
+
+  const sys = 'You are a super friendly fun science tutor for IB MYP Grade 6 students aged 11-12. Use simple words fun analogies and real-life examples. Keep answers under 150 words. Use emojis! End with an encouraging sentence.';
+  const fullPrompt = encodeURIComponent(sys + '\n\nStudent question: ' + question);
+
+  const tryFetch = async (url, opts) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
+    try {
+      const r = await fetch(url, { ...opts, signal: controller.signal });
+      clearTimeout(timer);
+      return r;
+    } catch(e) { clearTimeout(timer); throw e; }
+  };
+
+  // Try 1: Pollinations simple GET endpoint (no CORS issues)
+  try {
+    const res = await tryFetch(`https://text.pollinations.ai/${fullPrompt}?model=openai&private=true`, {});
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.length > 5) {
+        ld.textContent = text;
+        ld.classList.remove('thinking');
+        btn.disabled = false;
+        document.getElementById('msgs').scrollTop = 99999;
+        return;
+      }
+    }
+  } catch(e) {}
+
+  // Try 2: Pollinations POST endpoint
+  try {
+    const res = await tryFetch('https://text.pollinations.ai/openai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'openai',
+        messages: [
+          { role: 'system', content: sys },
+          { role: 'user', content: question }
+        ],
+        max_tokens: 400,
+        private: true
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const reply = data.choices?.[0]?.message?.content;
+      if (reply) {
+        ld.textContent = reply;
+        ld.classList.remove('thinking');
+        btn.disabled = false;
+        document.getElementById('msgs').scrollTop = 99999;
+        return;
+      }
+    }
+  } catch(e) {}
+
+  // Try 3: Pollinations alternate model
+  try {
+    const res = await tryFetch(`https://text.pollinations.ai/${fullPrompt}?model=mistral&private=true`, {});
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.length > 5) {
+        ld.textContent = text;
+        ld.classList.remove('thinking');
+        btn.disabled = false;
+        document.getElementById('msgs').scrollTop = 99999;
+        return;
+      }
+    }
+  } catch(e) {}
+
+  // All failed
+  ld.textContent = '😔 The AI is taking a break right now. Check your internet connection and try again in a moment!';
+  ld.classList.remove('thinking');
+  btn.disabled = false;
+  document.getElementById('msgs').scrollTop = 99999;
+}
+
+function sendQ() {
+  const inp = document.getElementById('ainput');
+  const q = inp.value.trim();
+  if (!q) return;
+  inp.value = '';
+  addMsg(q, 'user');
+  callAI(q);
+}
+
+function sendChip(text) {
+  addMsg(text, 'user');
+  callAI(text);
+}
+
+function askUnit(unit) {
+  go('ask', document.querySelectorAll('.nb')[4]);
+  const q = `Give me a fun, simple overview of IB MYP Grade 6 ${unit}. What are the 3 most important things to know? Use simple language and a fun example!`;
+  addMsg('Tell me about ' + unit + ' 🔬', 'user');
+  callAI(q);
+}
+
+function askLab(prompt) {
+  go('ask', document.querySelectorAll('.nb')[4]);
+  addMsg('I need help with this experiment! 🧪', 'user');
+  callAI(prompt);
+}
+
+document.getElementById('ainput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQ(); }
+});
+
+// ─── NAVIGATION ───────────────────────────────────────────
+function go(name, btn) {
+  document.querySelectorAll('.sc').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  document.getElementById('sc-' + name).classList.add('on');
+  btn.classList.add('on');
+  document.getElementById('scroll').scrollTop = 0;
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+renderUnits();
+renderDaily();
+renderQuiz();
+renderLab();
+renderChips();
+</script>
+</body>
+</html>
