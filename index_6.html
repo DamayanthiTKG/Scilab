@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SciLab 🔬</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f1a;
+  --card: #1a1a2e;
+  --card2: #16213e;
+  --border: rgba(255,255,255,0.07);
+  --text: #f0f0ff;
+  --muted: #8888aa;
+  --green: #4ade80;
+  --blue: #60a5fa;
+  --purple: #a78bfa;
+  --yellow: #fbbf24;
+  --pink: #f472b6;
+  --orange: #fb923c;
+  --nav: 68px;
+  --safe: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* WELCOME SCREEN */
+#welcome {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100dvh; padding: 32px 24px; text-align: center;
+}
+#welcome h1 { font-family: 'Fredoka One', cursive; font-size: 42px; color: var(--green); margin-bottom: 8px; }
+#welcome p { font-size: 16px; color: var(--muted); margin-bottom: 40px; }
+.kid-btn {
+  width: 100%; padding: 20px; border-radius: 20px; border: 2px solid;
+  font-family: 'Fredoka One', cursive; font-size: 22px; cursor: pointer;
+  margin-bottom: 14px; transition: transform 0.15s; display: flex;
+  align-items: center; gap: 16px;
+}
+.kid-btn:active { transform: scale(0.97); }
+.kid1-btn { background: rgba(96,165,250,0.1); border-color: rgba(96,165,250,0.3); color: var(--blue); }
+.kid2-btn { background: rgba(244,114,182,0.1); border-color: rgba(244,114,182,0.3); color: var(--pink); }
+.kid-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+.kid-info { text-align: left; }
+.kid-info span { display: block; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; opacity: 0.7; margin-top: 2px; }
+
+/* APP */
+#app { display: none; flex-direction: column; height: 100dvh; }
+#app.visible { display: flex; }
+
+#scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--nav) + var(--safe) + 20px);
+  scrollbar-width: none;
+}
+#scroll::-webkit-scrollbar { display: none; }
+
+/* TOP BAR */
+#topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 0;
+}
+.logo { font-family: 'Fredoka One', cursive; font-size: 20px; }
+.topright { display: flex; align-items: center; gap: 8px; }
+.xpbadge { font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 99px; border: 1px solid; }
+.switch-btn { font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 99px; background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); cursor: pointer; }
+
+/* NAV */
+#nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  height: calc(var(--nav) + var(--safe));
+  padding-bottom: var(--safe);
+  background: rgba(15,15,26,0.95);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-around;
+  z-index: 100;
+}
+.nb {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: none; border: none; cursor: pointer;
+  color: var(--muted); font-family: 'Nunito', sans-serif;
+  font-size: 10px; font-weight: 700; flex: 1; padding: 8px 0;
+  transition: color 0.2s;
+}
+.nb .ico { font-size: 22px; line-height: 1; transition: transform 0.2s; }
+.nb.on { color: var(--text); }
+.nb.on .ico { transform: scale(1.15); }
+
+/* SCREENS */
+.sc { display: none; padding: 0 16px; animation: fadeUp 0.2s ease; }
+.sc.on { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* TYPOGRAPHY */
+.ftitle { font-family: 'Fredoka One', cursive; font-size: 28px; line-height: 1.1; padding: 18px 0 4px; }
+.stitle { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 16px 0 10px; }
+
+/* HERO */
+.hero {
+  margin: 12px 0 4px;
+  border-radius: 20px; padding: 20px; position: relative; overflow: hidden;
+  border: 1px solid;
+}
+.hero-sub { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+.hero h2 { font-family: 'Fredoka One', cursive; font-size: 20px; margin-bottom: 14px; line-height: 1.3; }
+.hero-emoji { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 56px; opacity: 0.15; }
+.pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill { padding: 5px 12px; border-radius: 99px; font-size: 12px; font-weight: 700; border: 1px solid; }
+
+/* ACTIVITY CARD */
+.acard { background: var(--card); border: 1px solid var(--border); border-radius: 20px; margin-bottom: 12px; overflow: hidden; }
+.acard-top { padding: 16px; display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
+.acard-top:active { opacity: 0.85; }
+.aicon { width: 48px; height: 48px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.abody { flex: 1; min-width: 0; }
+.abody h3 { font-size: 15px; font-weight: 900; margin-bottom: 4px; line-height: 1.3; }
+.abody p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.atags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.atag { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 99px; }
+.tg { background: rgba(74,222,128,0.1); color: var(--green); }
+.tb { background: rgba(96,165,250,0.1); color: var(--blue); }
+.tp { background: rgba(167,139,250,0.1); color: var(--purple); }
+.ty { background: rgba(251,191,36,0.1); color: var(--yellow); }
+.to { background: rgba(251,146,60,0.1); color: var(--orange); }
+.achk { width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.12); background: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; flex-shrink: 0; transition: all 0.2s; }
+.achk.done { background: rgba(74,222,128,0.15); border-color: var(--green); color: var(--green); }
+.expand-btn { width: 100%; padding: 10px; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; background: none; border: none; border-top: 1px solid var(--border); color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.expand-arrow { transition: transform 0.2s; font-style: normal; }
+.expand-arrow.open { transform: rotate(180deg); }
+.steps-wrap { display: none; border-top: 1px solid var(--border); padding: 16px; }
+.steps-wrap.open { display: block; }
+.steps-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+.step:last-child { margin-bottom: 0; }
+.snum { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; flex-shrink: 0; margin-top: 1px; }
+.stext { font-size: 13px; line-height: 1.6; flex: 1; }
+.fun-fact { margin-top: 12px; padding: 10px 14px; border-radius: 12px; font-size: 12px; line-height: 1.6; background: rgba(251,191,36,0.07); border: 1px solid rgba(251,191,36,0.15); color: #fde68a; }
+
+/* QUIZ */
+.qcard { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 12px; }
+.qmeta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.qbadge { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: 99px; background: rgba(167,139,250,0.1); color: var(--purple); }
+.qcount { font-size: 12px; color: var(--muted); font-weight: 700; }
+.qq { font-family: 'Fredoka One', cursive; font-size: 20px; line-height: 1.3; margin-bottom: 18px; }
+.opt { width: 100%; text-align: left; padding: 13px 16px; margin-bottom: 8px; font-size: 14px; font-weight: 700; font-family: 'Nunito', sans-serif; border: 1.5px solid rgba(255,255,255,0.08); border-radius: 12px; background: rgba(255,255,255,0.03); color: var(--text); cursor: pointer; transition: all 0.15s; }
+.opt:active { transform: scale(0.98); }
+.opt.correct { background: rgba(74,222,128,0.12); border-color: var(--green); color: var(--green); }
+.opt.wrong { background: rgba(244,114,182,0.1); border-color: var(--pink); color: var(--pink); }
+.fb { padding: 12px 14px; border-radius: 12px; font-size: 13px; line-height: 1.6; display: none; margin: 8px 0; }
+.fb.show { display: block; }
+.fb.ok { background: rgba(74,222,128,0.08); color: #86efac; border: 1px solid rgba(74,222,128,0.2); }
+.fb.no { background: rgba(244,114,182,0.08); color: #f9a8d4; border: 1px solid rgba(244,114,182,0.2); }
+.nxtbtn { width: 100%; padding: 13px; font-size: 14px; font-weight: 900; font-family: 'Nunito', sans-serif; background: rgba(74,222,128,0.1); color: var(--green); border: 1.5px solid rgba(74,222,128,0.2); border-radius: 12px; cursor: pointer; display: none; margin-top: 4px; }
+.nxtbtn.show { display: block; }
+.score-wrap { text-align: center; padding: 32px 16px; }
+.score-big { font-family: 'Fredoka One', cursive; font-size: 80px; line-height: 1; }
+.score-sub { font-size: 14px; color: var(--muted); margin-top: 6px; }
+.score-msg { font-family: 'Fredoka One', cursive; font-size: 22px; margin-top: 16px; }
+.retry { margin-top: 20px; padding: 13px 28px; font-size: 14px; font-weight: 700; font-family: 'Nunito', sans-serif; background: rgba(255,255,255,0.05); color: var(--text); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; }
+
+/* PROGRESS */
+.prog-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 12px; }
+.prog-card h3 { font-family: 'Fredoka One', cursive; font-size: 18px; margin-bottom: 16px; }
+.prog-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.prog-emoji { font-size: 22px; width: 36px; text-align: center; flex-shrink: 0; }
+.prog-info { flex: 1; }
+.prog-info p { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.prog-bar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+.prog-pct { font-size: 12px; font-weight: 700; color: var(--muted); width: 36px; text-align: right; flex-shrink: 0; }
+.badge-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 16px; }
+.badge { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 14px; padding: 12px 8px; text-align: center; }
+.badge .be { font-size: 24px; margin-bottom: 4px; }
+.badge .bl { font-size: 10px; font-weight: 700; color: var(--muted); line-height: 1.3; }
+.badge.earned { border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.06); }
+.badge.earned .bl { color: var(--yellow); }
+</style>
+</head>
+<body>
+
+<!-- WELCOME / KID SELECT SCREEN -->
+<div id="welcome">
+  <h1>SciLab 🔬</h1>
+  <p>IB Grade 6 · Holiday Science</p>
+  <button class="kid-btn kid1-btn" onclick="startApp('kid1')">
+    <div class="kid-avatar" style="background:rgba(96,165,250,0.15)">🧑‍🔬</div>
+    <div class="kid-info">Sanjey <span>Tap to start your adventure! 🧑‍🔬</span></div>
+  </button>
+  <button class="kid-btn kid2-btn" onclick="startApp('kid2')">
+    <div class="kid-avatar" style="background:rgba(244,114,182,0.15)">👩‍🔬</div>
+    <div class="kid-info">Krish <span>Tap to start your adventure! 👨‍🔬</span></div>
+  </button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div id="topbar">
+    <div class="logo" id="kidlogo">SciLab</div>
+    <div class="topright">
+      <div class="xpbadge" id="xpbadge">⭐ 0 XP</div>
+      <button class="switch-btn" onclick="switchKid()">Switch</button>
+    </div>
+  </div>
+
+  <div id="scroll">
+    <!-- HOME -->
+    <div class="sc on" id="sc-home">
+      <div class="ftitle" id="greeting">Hello! 👋</div>
+      <div class="hero" id="hero-card">
+        <div class="hero-emoji" id="hero-emoji">🔬</div>
+        <div class="hero-sub" id="hero-sub">IB MYP Year 1</div>
+        <h2 id="hero-title">Your science holiday!</h2>
+        <div class="pills">
+          <div class="pill" id="streakpill" style="background:rgba(74,222,128,0.1);color:var(--green);border-color:rgba(74,222,128,0.2)">🔥 0 day streak</div>
+          <div class="pill" style="background:rgba(251,146,60,0.1);color:var(--orange);border-color:rgba(251,146,60,0.2)">5 activities today</div>
+        </div>
+      </div>
+      <div class="stitle">Today's 5 activities</div>
+      <div id="home-acts"></div>
+    </div>
+
+    <!-- QUIZ -->
+    <div class="sc" id="sc-quiz">
+      <div class="ftitle" style="color:var(--purple)">Quiz Time! 🧠</div>
+      <div id="qarea"></div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="sc" id="sc-progress">
+      <div class="ftitle" style="color:var(--yellow)">My Progress 🏆</div>
+      <div id="prog-area"></div>
+    </div>
+  </div>
+
+  <nav id="nav">
+    <button class="nb on" onclick="go('home',this)"><span class="ico">🏠</span>Home</button>
+    <button class="nb" onclick="go('quiz',this)"><span class="ico">🧠</span>Quiz</button>
+    <button class="nb" onclick="go('progress',this)"><span class="ico">🏆</span>Progress</button>
+  </nav>
+</div>
+
+<script>
+// ─── KID CONFIGS ──────────────────────────────────────────
+const KIDS = {
+  kid1: {
+    name: 'Sanjey',
+    emoji: '🧑‍🔬',
+    color: 'var(--blue)',
+    heroBg: 'linear-gradient(135deg, #1e3a5f, #1a2744)',
+    heroBorder: 'rgba(96,165,250,0.2)',
+    heroEmoji: '⚗️',
+    greeting: 'Hey Sanjey! 🧑‍🔬',
+    heroTitle: 'Ready to be a scientist?',
+    welcomeNote: "Hi Sanjey! 👋 Welcome to YOUR science space! Every day you'll find 5 fun experiments and activities just for you. Complete them, earn XP, and collect badges. Krish has his own set of activities — compare notes and see who discovers the coolest science! 🏆 Let's go explore! 🔬",
+    activitySet: 'A',
+    quizSet: 'A',
+  },
+  kid2: {
+    name: 'Krish',
+    emoji: '👨‍🔬',
+    color: 'var(--pink)',
+    heroBg: 'linear-gradient(135deg, #3b1a3f, #2a1a3e)',
+    heroBorder: 'rgba(244,114,182,0.2)',
+    heroEmoji: '🔬',
+    greeting: 'Hey Krish! 👨‍🔬',
+    heroTitle: 'Your science adventure awaits!',
+    welcomeNote: "Hi Krish! 👋 Welcome to YOUR science space! You've got 5 amazing activities every day — all yours, all different from Sanjey's. Do the experiments, answer the quizzes, and collect your badges. Who will earn the most XP? 😄 The adventure starts NOW! 🚀",
+    activitySet: 'B',
+    quizSet: 'B',
+  }
+};
+
+// ─── ALL ACTIVITIES ───────────────────────────────────────
+const ACTIVITIES = {
+  A: [ // Kid 1's activities
+    {
+      id:'a1', emoji:'⚗️', title:'Kitchen Chemistry Lab',
+      desc:'Your kitchen is a science lab! Discover the difference between solutions and mixtures.',
+      tags:[{t:'⚗️ Chemistry',c:'tb'},{t:'⏱ 20 min',c:'tg'}],
+      bg:'rgba(96,165,250,0.12)', color:'var(--blue)',
+      steps:[
+        {t:'Set up 3 cups', d:'Label them A, B, C. Fill each halfway with water.'},
+        {t:'Cup A — Salt water', d:'Add a teaspoon of salt. Stir 30 seconds. It disappears! This is a solution — the salt dissolved! 🧂'},
+        {t:'Cup B — Sandy water', d:'Add a teaspoon of sand. Stir hard. Wait 1 minute — the sand sinks. This is a suspension!'},
+        {t:'Cup C — Oil water', d:'Add a tablespoon of cooking oil. Stir! Watch them separate. Oil and water never mix! 🫙'},
+        {t:'Record your results', d:'Draw a table: Mixture | Can you see the parts? | Does it separate? Fill in Yes/No.'},
+      ],
+      fact:'🤩 Fun Fact: The ocean is a GIANT solution — water with dissolved salts. That\'s why it tastes salty!'
+    },
+    {
+      id:'a2', emoji:'🔬', title:'Cell Observation Sketch',
+      desc:'Become a cell detective! Find hidden cell patterns using everyday objects.',
+      tags:[{t:'🦠 Biology',c:'tg'},{t:'⏱ 15 min',c:'tb'}],
+      bg:'rgba(74,222,128,0.12)', color:'var(--green)',
+      steps:[
+        {t:'Peel an onion', d:'Carefully peel off a very thin, see-through layer from the inside of an onion. 🧅'},
+        {t:'Hold it up to light', d:'Shine a torch through it. Can you see tiny rectangular shapes? Those are cells!'},
+        {t:'Draw what you see', d:'Sketch the shapes in your notebook. They look like a brick wall — those are cell walls! 🧱'},
+        {t:'Label your diagram', d:'Label: Cell wall (outer box), Cell membrane (thin inner line), Cytoplasm (jelly inside).'},
+        {t:'Think about it', d:'Write one sentence: "I think plant cells look like bricks because..." No wrong answer! ✨'},
+      ],
+      fact:'🤩 Fun Fact: Your body has around 37 TRILLION cells. If you lined them up, they\'d wrap around the Earth 200 times!'
+    },
+    {
+      id:'a3', emoji:'🌈', title:'Rainbow Light Splitter',
+      desc:'Split white light into ALL its colours using a CD and a torch. Like a rainbow maker!',
+      tags:[{t:'⚡ Physics',c:'ty'},{t:'⏱ 15 min',c:'tg'}],
+      bg:'rgba(251,191,36,0.12)', color:'var(--yellow)',
+      steps:[
+        {t:'Grab a CD or DVD', d:'Hold the shiny side facing a light source or sunny window. 💿'},
+        {t:'Find your rainbow', d:'Move it slowly until you see colours reflecting on the wall or your hand.'},
+        {t:'Draw the colours', d:'Sketch the rainbow. Write the colours in order: Red, Orange, Yellow, Green, Blue, Indigo, Violet.'},
+        {t:'Water prism', d:'Place a glass of water on white paper in sunlight. A rainbow appears below! 🌊'},
+        {t:'Compare both rainbows', d:'Are the colours in the same order in both experiments? Write your observation!'},
+      ],
+      fact:'🤩 Fun Fact: White light is actually ALL colours mixed together. A rainbow splits them apart again!'
+    },
+    {
+      id:'a4', emoji:'⚡', title:'Simple Circuit Builder',
+      desc:'Light up a bulb with a battery and wire! Make electricity flow with your own hands.',
+      tags:[{t:'⚡ Physics',c:'ty'},{t:'⏱ 25 min',c:'tb'}],
+      bg:'rgba(251,191,36,0.12)', color:'var(--yellow)',
+      steps:[
+        {t:'Get your materials', d:'1 AA battery, 30cm of wire, and a small LED bulb from a torch. 🔋'},
+        {t:'Complete the circuit', d:'Touch wire to (+) end of battery → LED → wire → (−) end. The bulb glows! 💡'},
+        {t:'Test insulators', d:'Put different materials between connections: plastic, rubber, a coin. What allows flow?'},
+        {t:'Draw the circuit', d:'Use symbols: Battery (long+short lines), Wire (straight line), Bulb (circle with X). 📝'},
+        {t:'The big idea', d:'Write: "Electricity flows when the circuit is ___ . Conductors are ___ . Insulators are ___ ."'},
+      ],
+      fact:'🤩 Fun Fact: Lightning is electricity jumping between clouds and the ground — carrying about 1 BILLION volts!'
+    },
+    {
+      id:'a5', emoji:'📊', title:'Temperature Scientist',
+      desc:'Collect REAL scientific data! Measure temperature changes all day like a pro scientist.',
+      tags:[{t:'🔍 Inquiry',c:'tp'},{t:'⏱ All day',c:'to'}],
+      bg:'rgba(167,139,250,0.12)', color:'var(--purple)',
+      steps:[
+        {t:'Write your hypothesis', d:'Predict: "I think the temperature will be highest at ___ o\'clock because..." 🤔'},
+        {t:'Set up your table', d:'Draw columns: Time | Room Temp | Outside Temp. You\'ll record every 2 hours.'},
+        {t:'Take readings', d:'Record at 8am, 10am, 12pm, 2pm, 4pm and 6pm. Keep your notebook handy! ⏰'},
+        {t:'Draw your graph', d:'Plot your readings on a line graph. Time = x-axis, Temperature = y-axis. 📈'},
+        {t:'Analyse results', d:'Was your hypothesis correct? Write 2 sentences about what you discovered!'},
+      ],
+      fact:'🤩 Fun Fact: The hottest temperature ever recorded on Earth was 56.7°C in Death Valley, California in 1913!'
+    },
+  ],
+  B: [ // Kid 2's activities
+    {
+      id:'b1', emoji:'🫧', title:'Surface Tension Magic',
+      desc:'Watch water do something almost magical — hold objects that should sink!',
+      tags:[{t:'⚗️ Chemistry',c:'tb'},{t:'⏱ 15 min',c:'tg'}],
+      bg:'rgba(96,165,250,0.12)', color:'var(--blue)',
+      steps:[
+        {t:'Fill a glass to the brim', d:'Fill a drinking glass completely full of water — right to the very top! 💧'},
+        {t:'The coin challenge', d:'Drop coins one by one. How many can you add before it overflows? Guess first! 🪙'},
+        {t:'Float a paperclip', d:'VERY gently lay a paperclip flat on the water surface. It floats — metal floats! 📎'},
+        {t:'Add washing-up liquid', d:'Put ONE drop of soap near the paperclip. It sinks instantly! Soap breaks tension! 🧼'},
+        {t:'Pepper trick', d:'Sprinkle pepper on fresh water. Touch centre with soapy finger — pepper races away! 🌶️'},
+      ],
+      fact:'🤩 Fun Fact: Water strider insects can walk on water because of surface tension — they\'re using the same force you just tested!'
+    },
+    {
+      id:'b2', emoji:'🎨', title:'Chromatography Art',
+      desc:'Watch ink magically separate into hidden colours using just paper and water!',
+      tags:[{t:'⚗️ Chemistry',c:'tb'},{t:'⏱ 15 min',c:'tp'}],
+      bg:'rgba(167,139,250,0.12)', color:'var(--purple)',
+      steps:[
+        {t:'Cut filter paper', d:'Cut a strip of coffee filter paper about 15cm long and 3cm wide. ✂️'},
+        {t:'Draw your line', d:'Draw a thick BLACK marker line 2cm from the bottom of the strip.'},
+        {t:'Dip in water', d:'Hang the strip so only the BOTTOM touches water. The ink line must stay ABOVE water! 💧'},
+        {t:'Watch the magic', d:'Water creeps UP. When it hits the ink, the ink separates into different colours! 🌈'},
+        {t:'Count the colours', d:'How many colours came from ONE black marker? Label each colour band! 🖊️'},
+      ],
+      fact:'🤩 Fun Fact: Black ink is actually a mixture of MANY colours — chromatography reveals the hidden ones. Scientists use this to identify unknown substances!'
+    },
+    {
+      id:'b3', emoji:'🌱', title:'Seed Germination Race',
+      desc:'Grow 4 bean seeds under different conditions. Which one wins the germination race?',
+      tags:[{t:'🦠 Biology',c:'tg'},{t:'⏱ 7 days',c:'to'}],
+      bg:'rgba(74,222,128,0.12)', color:'var(--green)',
+      steps:[
+        {t:'Set up 4 cups', d:'Cup 1: Warm+Light+Water. Cup 2: Warm+Dark+Water. Cup 3: Cold+Water. Cup 4: Warm+Light+No water. 🌱'},
+        {t:'Plant your seeds', d:'Put 2 seeds in each cup, 1cm deep. Label everything clearly.'},
+        {t:'Write your hypothesis', d:'Predict: "Seeds will grow best in Cup ___ because plants need ___, ___, and ___."'},
+        {t:'Check every day', d:'Measure any sprouts with a ruler. Write in your table every single day! 📏'},
+        {t:'Draw conclusions', d:'After 7 days, write: "The variable that had the biggest effect was ___ because..." 🏆'},
+      ],
+      fact:'🤩 Fun Fact: Some seeds can stay dormant for THOUSANDS of years and still grow! A 2,000-year-old date palm seed was grown in Israel!'
+    },
+    {
+      id:'b4', emoji:'🌿', title:'Photosynthesis Experiment',
+      desc:'Find out if leaves really DO need sunlight to make food. The result is mind-blowing!',
+      tags:[{t:'🦠 Biology',c:'tg'},{t:'⏱ 2 days',c:'to'}],
+      bg:'rgba(74,222,128,0.12)', color:'var(--green)',
+      steps:[
+        {t:'Write your prediction', d:'Hypothesis: "If I block sunlight from half a leaf, then... because plants use light to..." 🌞'},
+        {t:'Cover half a leaf', d:'Attach black tape to completely cover ONE half of a leaf on a plant. Leave for 2 days! 🌿'},
+        {t:'Remove the leaf (Day 2)', d:'After 48 hours, carefully remove the leaf and peel off the tape.'},
+        {t:'The iodine test', d:'With adult help, dip in iodine solution. The UNcovered half turns BLACK — that\'s starch! ⚫'},
+        {t:'Explain your results', d:'Write: "The covered half did NOT turn black because..." Connect it to photosynthesis! 🌱'},
+      ],
+      fact:'🤩 Fun Fact: A single large tree produces enough oxygen for 4 people to breathe for an entire year through photosynthesis!'
+    },
+    {
+      id:'b5', emoji:'💧', title:'Water Purification Challenge',
+      desc:'Build a water filter from scratch! Discover how water treatment plants clean our water.',
+      tags:[{t:'♻️ Environment',c:'tg'},{t:'⏱ 40 min',c:'tb'}],
+      bg:'rgba(74,222,128,0.12)', color:'var(--green)',
+      steps:[
+        {t:'Make dirty water', d:'Mix soil, leaves, and a drop of food colouring into a cup of water. Stir well! 🪣'},
+        {t:'Build your filter', d:'In the top half of a cut bottle, layer: cotton wool, fine sand, coarse sand, small pebbles. 🏗️'},
+        {t:'Filter your water', d:'Pour dirty water slowly through your filter. Watch each layer trap different particles! 👀'},
+        {t:'Compare before and after', d:'Hold original dirty water and filtered water to light. How much clearer is it?'},
+        {t:'The big picture', d:'Write: "My filter removed ___ . Real water plants also add ___ to kill bacteria." 🌍'},
+      ],
+      fact:'🤩 Fun Fact: Only 3% of Earth\'s water is fresh water — and most of THAT is frozen in glaciers. Clean water is precious!'
+    },
+  ]
+};
+
+// ─── QUIZ QUESTIONS ───────────────────────────────────────
+const QUIZZES = {
+  A: [
+    { q:'What is the powerhouse of the cell? 🔋', opts:['Cell wall','Nucleus','Mitochondria','Ribosome'], ans:2, exp:'⚡ Mitochondria make energy (ATP) for the cell — every cell\'s power station!' },
+    { q:'Which state of matter has definite volume but NO definite shape? 💧', opts:['Solid','Liquid','Gas','Plasma'], ans:1, exp:'💧 Liquids keep their volume but flow to fill any container shape!' },
+    { q:'What is the INDEPENDENT variable in an experiment? 🔬', opts:['What you measure','What you change','What stays the same','The conclusion'], ans:1, exp:'🔬 The independent variable is what YOU deliberately change. Everything else stays the same!' },
+    { q:'What force pulls objects towards Earth? 🌍', opts:['Magnetism','Friction','Tension','Gravity'], ans:3, exp:'🌍 Gravity attracts everything with mass. That\'s why we don\'t float away!' },
+    { q:'Which process do plants use to make food? 🌱', opts:['Respiration','Digestion','Photosynthesis','Excretion'], ans:2, exp:'🌱 Photosynthesis uses sunlight + water + CO₂ to make glucose. Plants are solar-powered!' },
+    { q:'What does the nucleus of a cell do? 🧬', opts:['Makes energy','Controls the cell','Protects the cell','Stores water'], ans:1, exp:'🧬 The nucleus is the control centre — it contains DNA with all life\'s instructions!' },
+    { q:'What is the formula for density? ⚗️', opts:['Mass × Volume','Mass ÷ Volume','Volume ÷ Mass','Mass + Volume'], ans:1, exp:'⚗️ Density = Mass ÷ Volume. More mass in same space = denser!' },
+    { q:'Which is a CHEMICAL change? 🔥', opts:['Melting ice','Cutting paper','Burning wood','Dissolving salt'], ans:2, exp:'🔥 Burning creates NEW substances. You can\'t un-burn wood — it\'s irreversible!' },
+    { q:'What unit measures force? ⚡', opts:['Kilogram','Newton','Joule','Watt'], ans:1, exp:'⚡ The Newton (N) is named after Isaac Newton — the apple-and-gravity guy!' },
+    { q:'What gas do plants absorb during photosynthesis? 🌿', opts:['Oxygen','Nitrogen','Carbon dioxide','Hydrogen'], ans:2, exp:'🌿 Plants breathe IN CO₂ and breathe OUT O₂ — opposite of us! Forests are Earth\'s lungs.' },
+  ],
+  B: [
+    { q:'What is the outermost layer of the Earth? 🌍', opts:['Mantle','Inner core','Outer core','Crust'], ans:3, exp:'🌍 The crust is the thin layer we live on — like the skin of an apple!' },
+    { q:'What type of energy does a stretched rubber band have? 🤸', opts:['Kinetic','Thermal','Elastic potential','Chemical'], ans:2, exp:'🤸 Elastic potential energy is stored in stretched objects. Release it → becomes kinetic!' },
+    { q:'What is a food chain? 🍃', opts:['A list of foods','How energy flows between organisms','A type of bond','How animals move'], ans:1, exp:'🍃 Food chains show energy flow: Sun → Plant → Herbivore → Carnivore!' },
+    { q:'What is an element? ⚛️', opts:['A compound','A mixture','A pure substance with one type of atom','A molecule'], ans:2, exp:'⚛️ Elements are pure substances — gold, carbon, oxygen are all elements!' },
+    { q:'What happens to particles when a solid melts? 🔥', opts:['They stop moving','They move faster and spread out','They shrink','They disappear'], ans:1, exp:'🔥 Heat gives particles energy to break free from fixed positions — solid becomes liquid!' },
+    { q:'What is the role of chlorophyll in plants? 🌿', opts:['Absorbs water','Absorbs sunlight','Makes seeds','Stores minerals'], ans:1, exp:'🌿 Chlorophyll absorbs sunlight to power photosynthesis — it\'s also what makes plants green!' },
+    { q:'What type of rock forms from cooled lava? 🌋', opts:['Sedimentary','Metamorphic','Igneous','Fossil'], ans:2, exp:'🌋 Igneous rocks form when magma or lava cools and solidifies. Granite is one example!' },
+    { q:'What is the water cycle? 💧', opts:['Water flowing in rivers','The continuous movement of water on Earth','Rainfall only','Ocean currents'], ans:1, exp:'💧 The water cycle: evaporation → condensation → precipitation → collection. It never stops!' },
+    { q:'What causes day and night? 🌅', opts:['Earth orbiting the Sun','The Moon blocking the Sun','Earth rotating on its axis','Clouds covering the Sun'], ans:2, exp:'🌅 Earth spins on its axis every 24 hours — day on the side facing the Sun, night on the other!' },
+    { q:'What is biodiversity? 🌍', opts:['One type of habitat','The variety of life in an area','Number of plants only','Weather patterns'], ans:1, exp:'🌍 Biodiversity = the variety of all living things. More biodiversity = healthier ecosystem!' },
+  ]
+};
+
+// ─── STATE (per kid, saved in localStorage) ───────────────
+let currentKid = null;
+
+function getState(kid) {
+  const saved = localStorage.getItem('scilab_' + kid);
+  if (saved) return JSON.parse(saved);
+  return { xp: 0, streak: 0, done: {}, qidx: 0, qscore: 0, qdone: false, totalActs: 0, totalQuiz: 0 };
+}
+
+function saveState(kid, s) {
+  localStorage.setItem('scilab_' + kid, JSON.stringify(s));
+}
+
+let S = {};
+
+// ─── START APP ────────────────────────────────────────────
+function startApp(kid) {
+  // Check URL for auto-login
+  currentKid = kid;
+  S = getState(kid);
+  const cfg = KIDS[kid];
+
+  document.getElementById('welcome').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+
+  // Update URL so link can be shared
+  history.replaceState(null, '', '?kid=' + kid);
+
+  // Style top bar
+  document.getElementById('kidlogo').textContent = cfg.emoji + ' ' + cfg.name;
+  document.getElementById('kidlogo').style.color = cfg.color;
+
+  updateXP();
+  renderHome();
+  renderQuiz();
+  renderProgress();
+}
+
+function switchKid() {
+  history.replaceState(null, '', window.location.pathname);
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('welcome').style.display = 'flex';
+  currentKid = null;
+  // Reset to home tab
+  document.querySelectorAll('.sc').forEach(s => s.classList.remove('on'));
+  document.getElementById('sc-home').classList.add('on');
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.nb')[0].classList.add('on');
+}
+
+// ─── XP ───────────────────────────────────────────────────
+function updateXP() {
+  const cfg = KIDS[currentKid];
+  document.getElementById('xpbadge').textContent = '⭐ ' + S.xp + ' XP';
+  document.getElementById('xpbadge').style.background = 'rgba(251,191,36,0.1)';
+  document.getElementById('xpbadge').style.color = 'var(--yellow)';
+  document.getElementById('xpbadge').style.borderColor = 'rgba(251,191,36,0.2)';
+  document.getElementById('streakpill').textContent = '🔥 ' + S.streak + ' day streak';
+}
+
+// ─── RENDER HOME ──────────────────────────────────────────
+function renderHome() {
+  const cfg = KIDS[currentKid];
+  const acts = ACTIVITIES[cfg.activitySet];
+
+  document.getElementById('greeting').textContent = cfg.greeting;
+  document.getElementById('hero-title').textContent = cfg.heroTitle;
+  document.getElementById('hero-emoji').textContent = cfg.heroEmoji;
+  document.getElementById('hero-card').style.background = cfg.heroBg;
+  document.getElementById('hero-card').style.borderColor = cfg.heroBorder;
+
+  // Welcome note
+  const existingNote = document.getElementById('welcome-note');
+  if (!existingNote) {
+    const noteDiv = document.createElement('div');
+    noteDiv.id = 'welcome-note';
+    noteDiv.style.cssText = `margin: 14px 0 4px; padding: 16px 18px; border-radius: 18px; font-size: 14px; line-height: 1.7; border: 1px solid; background: ${cfg.heroBg}; border-color: ${cfg.heroBorder}; color: var(--text);`;
+    noteDiv.innerHTML = '<div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;opacity:0.6">Welcome Note 💌</div>' + cfg.welcomeNote;
+    const greetingEl = document.getElementById('greeting');
+    greetingEl.parentNode.insertBefore(noteDiv, greetingEl.nextSibling);
+  } else {
+    existingNote.style.cssText = `margin: 14px 0 4px; padding: 16px 18px; border-radius: 18px; font-size: 14px; line-height: 1.7; border: 1px solid; background: ${cfg.heroBg}; border-color: ${cfg.heroBorder}; color: var(--text);`;
+    existingNote.innerHTML = '<div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;opacity:0.6">Welcome Note 💌</div>' + cfg.welcomeNote;
+  }
+
+  document.getElementById('home-acts').innerHTML = acts.map(a => `
+    <div class="acard">
+      <div class="acard-top" onclick="toggleSteps('${a.id}')">
+        <div class="aicon" style="background:${a.bg}">${a.emoji}</div>
+        <div class="abody">
+          <h3>${a.title}</h3>
+          <p>${a.desc}</p>
+          <div class="atags">${a.tags.map(t => `<span class="atag ${t.c}">${t.t}</span>`).join('')}</div>
+        </div>
+        <button class="achk ${S.done[a.id] ? 'done' : ''}" id="chk-${a.id}" onclick="toggleDone(event,'${a.id}')">
+          ${S.done[a.id] ? '✓' : ''}
+        </button>
+      </div>
+      <button class="expand-btn" onclick="toggleSteps('${a.id}')">
+        <span id="exlbl-${a.id}">See steps 👇</span>
+        <em class="expand-arrow" id="arr-${a.id}">▼</em>
+      </button>
+      <div class="steps-wrap" id="steps-${a.id}">
+        <div class="steps-title">Step by step</div>
+        ${a.steps.map((st, i) => `
+          <div class="step">
+            <div class="snum" style="background:${a.bg};color:${a.color}">${i + 1}</div>
+            <div class="stext"><strong>${st.t}:</strong> ${st.d}</div>
+          </div>
+        `).join('')}
+        <div class="fun-fact">${a.fact}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleSteps(id) {
+  const sw = document.getElementById('steps-' + id);
+  const arr = document.getElementById('arr-' + id);
+  const lbl = document.getElementById('exlbl-' + id);
+  const open = sw.classList.toggle('open');
+  arr.classList.toggle('open', open);
+  lbl.textContent = open ? 'Hide steps ▲' : 'See steps 👇';
+}
+
+function toggleDone(e, id) {
+  e.stopPropagation();
+  S.done[id] = !S.done[id];
+  if (S.done[id]) {
+    S.xp += 10;
+    S.streak++;
+    S.totalActs++;
+    updateXP();
+    renderProgress();
+  } else {
+    S.xp = Math.max(0, S.xp - 10);
+    S.totalActs = Math.max(0, S.totalActs - 1);
+    updateXP();
+    renderProgress();
+  }
+  saveState(currentKid, S);
+  const btn = document.getElementById('chk-' + id);
+  btn.className = 'achk ' + (S.done[id] ? 'done' : '');
+  btn.textContent = S.done[id] ? '✓' : '';
+}
+
+// ─── RENDER QUIZ ──────────────────────────────────────────
+function renderQuiz() {
+  const cfg = KIDS[currentKid];
+  const qs = QUIZZES[cfg.quizSet];
+  const el = document.getElementById('qarea');
+
+  if (S.qdone) {
+    const msgs = S.qscore >= 4 ? '🎉 Amazing work!' : S.qscore >= 3 ? '🌟 Great job!' : S.qscore >= 2 ? '👍 Good effort!' : '📖 Keep practising!';
+    el.innerHTML = `<div class="qcard"><div class="score-wrap">
+      <div class="score-big" style="color:${cfg.color}">${S.qscore}/5</div>
+      <div class="score-sub">questions correct</div>
+      <div class="score-msg">${msgs}</div>
+      <button class="retry" onclick="resetQuiz()">Try again 🔄</button>
+    </div></div>`;
+    return;
+  }
+
+  const dayQ = Math.floor(Date.now() / 86400000);
+  const pool = [];
+  for (let i = 0; i < 5; i++) pool.push(qs[(dayQ + i * 2) % qs.length]);
+  const q = pool[S.qidx];
+
+  el.innerHTML = `<div class="qcard">
+    <div class="qmeta">
+      <span class="qbadge" style="background:rgba(167,139,250,0.1);color:${cfg.color}">IB Grade 6 · Science</span>
+      <span class="qcount">Q${S.qidx + 1} of 5</span>
+    </div>
+    <div class="qq">${q.q}</div>
+    ${q.opts.map((o, i) => `<button class="opt" onclick="answer(${i})">${o}</button>`).join('')}
+    <div class="fb" id="fb"></div>
+    <button class="nxtbtn" id="nxt" onclick="nextQ()">Next question →</button>
+  </div>`;
+}
+
+function answer(idx) {
+  const cfg = KIDS[currentKid];
+  const qs = QUIZZES[cfg.quizSet];
+  const dayQ = Math.floor(Date.now() / 86400000);
+  const pool = [];
+  for (let i = 0; i < 5; i++) pool.push(qs[(dayQ + i * 2) % qs.length]);
+  const q = pool[S.qidx];
+
+  document.querySelectorAll('.opt').forEach(b => b.disabled = true);
+  document.querySelectorAll('.opt')[q.ans].classList.add('correct');
+  const fb = document.getElementById('fb');
+
+  if (idx === q.ans) {
+    S.qscore++;
+    S.xp += 5;
+    S.totalQuiz++;
+    updateXP();
+    fb.className = 'fb show ok';
+    fb.textContent = q.exp;
+  } else {
+    document.querySelectorAll('.opt')[idx].classList.add('wrong');
+    fb.className = 'fb show no';
+    fb.textContent = '✗ Not quite — ' + q.exp;
+  }
+  saveState(currentKid, S);
+  document.getElementById('nxt').classList.add('show');
+}
+
+function nextQ() {
+  S.qidx++;
+  if (S.qidx >= 5) S.qdone = true;
+  saveState(currentKid, S);
+  renderQuiz();
+}
+
+function resetQuiz() {
+  S.qidx = 0;
+  S.qscore = 0;
+  S.qdone = false;
+  saveState(currentKid, S);
+  renderQuiz();
+}
+
+// ─── RENDER PROGRESS ──────────────────────────────────────
+function renderProgress() {
+  const cfg = KIDS[currentKid];
+  const acts = ACTIVITIES[cfg.activitySet];
+  const doneCnt = Object.values(S.done).filter(Boolean).length;
+  const actPct = Math.round((doneCnt / acts.length) * 100);
+  const quizPct = Math.round((S.totalQuiz / 10) * 100);
+  const xpPct = Math.min(100, Math.round((S.xp / 100) * 100));
+
+  const badges = [
+    { e:'🔬', l:'First Experiment', earned: doneCnt >= 1 },
+    { e:'🧠', l:'Quiz Starter', earned: S.totalQuiz >= 1 },
+    { e:'⭐', l:'50 XP Club', earned: S.xp >= 50 },
+    { e:'🏆', l:'All 5 Done!', earned: doneCnt >= 5 },
+    { e:'🔥', l:'3 Day Streak', earned: S.streak >= 3 },
+    { e:'💡', l:'10 Answers', earned: S.totalQuiz >= 10 },
+    { e:'🌟', l:'100 XP Star', earned: S.xp >= 100 },
+    { e:'👑', l:'Science Champ', earned: doneCnt >= 5 && S.xp >= 100 },
+  ];
+
+  document.getElementById('prog-area').innerHTML = `
+    <div class="prog-card">
+      <h3>Today's Activities</h3>
+      <div class="prog-row">
+        <div class="prog-emoji">🧪</div>
+        <div class="prog-info">
+          <p>Activities completed</p>
+          <div class="prog-bar"><div class="prog-fill" style="width:${actPct}%;background:${cfg.color}"></div></div>
+        </div>
+        <div class="prog-pct">${doneCnt}/${acts.length}</div>
+      </div>
+      <div class="prog-row">
+        <div class="prog-emoji">🧠</div>
+        <div class="prog-info">
+          <p>Quiz questions answered</p>
+          <div class="prog-bar"><div class="prog-fill" style="width:${quizPct}%;background:var(--purple)"></div></div>
+        </div>
+        <div class="prog-pct">${S.totalQuiz}</div>
+      </div>
+      <div class="prog-row">
+        <div class="prog-emoji">⭐</div>
+        <div class="prog-info">
+          <p>XP earned</p>
+          <div class="prog-bar"><div class="prog-fill" style="width:${xpPct}%;background:var(--yellow)"></div></div>
+        </div>
+        <div class="prog-pct">${S.xp}</div>
+      </div>
+    </div>
+    <div class="prog-card">
+      <h3>Badges 🏅</h3>
+      <div class="badge-grid">
+        ${badges.map(b => `
+          <div class="badge ${b.earned ? 'earned' : ''}">
+            <div class="be" style="${!b.earned ? 'filter:grayscale(1);opacity:0.3' : ''}">${b.e}</div>
+            <div class="bl">${b.l}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────
+function go(name, btn) {
+  document.querySelectorAll('.sc').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  document.getElementById('sc-' + name).classList.add('on');
+  btn.classList.add('on');
+  document.getElementById('scroll').scrollTop = 0;
+  if (name === 'quiz') renderQuiz();
+  if (name === 'progress') renderProgress();
+}
+
+// ─── AUTO LOGIN FROM URL ───────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const kid = params.get('kid');
+  if (kid === 'kid1' || kid === 'kid2') {
+    startApp(kid);
+  }
+});
+</script>
+</body>
+</html>
